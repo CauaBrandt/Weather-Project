@@ -1,4 +1,5 @@
 # Untracked files
 
 *.sql
-.vscode/settings.json
+.vscode
+.cache.sqlite
