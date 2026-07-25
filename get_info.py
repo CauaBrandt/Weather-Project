@@ -77,7 +77,6 @@ if __name__ == "__main__":
 	for key, value in hourly_data.items():
 		print(f"{key}: {value}")
 
-		# Remake the database
 		# Get cities locations
 		# Insert data to the database
 		# Finish the code
