@@ -1,6 +1,8 @@
 # Untracked files
 
+.venv
 *.sql
 .vscode
 .cache.sqlite
 *.csv
+.env
