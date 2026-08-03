@@ -1,17 +1,18 @@
 #!/bin/bash
 PSQL="psql -U postgres -d weather -t -A -c"
-
-while IFS=, read COD_UF UF NAME LAT LON REGION
+co
+while IFS=, read -r COD_UF UF NAME LAT LON REGION
 do
-    if [[ $NAME != 'nome' ]]
+    if [[ "$NAME" != 'nome' ]]
     then
         STATE=$($PSQL "SELECT name FROM states WHERE cod_uf = $COD_UF")
-        echo $STATE
-        if [[ -n $STATE ]]
+        if [[ -n "$STATE" ]]
         then
-            echo "State already in database!"
+            echo "$STATE is already in database!"
         else
-            $PSQL "INSERT INTO states(name, region, cod_uf) VALUES('$NAME', '$REGION', $COD_UF)"
+
+            SQL="INSERT INTO states(name, region, cod_uf) VALUES('$NAME', '$REGION', $COD_UF)"
+            $PSQL "$SQL"
         fi        
     fi
 done < estados.csv
