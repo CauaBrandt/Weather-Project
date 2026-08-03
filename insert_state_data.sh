@@ -1,6 +1,6 @@
 #!/bin/bash
 PSQL="psql -U postgres -d weather -t -A -c"
-co
+
 while IFS=, read -r COD_UF UF NAME LAT LON REGION
 do
     if [[ "$NAME" != 'nome' ]]
