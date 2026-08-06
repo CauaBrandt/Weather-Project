@@ -90,21 +90,22 @@ if __name__ == "__main__":
 	)
 	cur = conn.cursor()
 
-	# Get cities lat and lon
 	cur.execute("SELECT latitude, longitude, city_id, timezone FROM cities")
 	while True:
 		for lat, lon, city_id, timezone in cur.fetchall():
-			print(f"Cidy_id: {city_id}\nLattude: {lat}\nLongitude: {lon}\nTimezone: {timezone}")			
-			# Insert data to the database
 			date = dt.date(dt.now(pytz.timezone(timezone)))
-			
+
 			cur.execute(f"SELECT * FROM daily WHERE city_id = {city_id} AND date = '{date}'")
 			if cur.fetchone():
 				continue
-			
+
+			print(f"Cidy_id: {city_id}\nLattude: {lat}\nLongitude: {lon}\nTimezone: {timezone}")			
+					
 			hourly_data, daily_data = make_request(lat, lon)
-			# Insert to daily
-			cur.execute(f"INSERT INTO daily(weather_code, temperature_2m_max, temperature_2m_min, city_id, date) VALUES({daily_data["weather_code"][0]}, {daily_data["temperature_2m_max"][0]}, {daily_data["temperature_2m_min"][0]}, {city_id}, '{date}')")
+
+			cur.execute("INSERT INTO daily(weather_code, temperature_2m_max, temperature_2m_min, city_id, date) VALUES(%s, %s, %s, %s, %s)",
+					(daily_data["weather_code"][0], daily_data["temperature_2m_max"][0], daily_data["temperature_2m_min"][0], city_id, date)
+			    )
 			conn.commit()
 			print(f"Inserted {city_id}")
 			
