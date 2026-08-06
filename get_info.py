@@ -1,3 +1,10 @@
+# Import to use queries
+import psycopg
+# Import to use timer
+import time
+# Import date
+from datetime import datetime as dt
+import pytz
 import openmeteo_requests
 import pandas as pd
 import requests_cache
@@ -8,10 +15,11 @@ cache_session = requests_cache.CachedSession('.cache', expire_after = 3600)
 retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
 openmeteo = openmeteo_requests.Client(session = retry_session)
 
-# Make sure all required weather variables are listed here
 # The order of variables in hourly or daily is important to assign them correctly below
+url = "https://api.open-meteo.com/v1/forecast"
+
 def make_request(lat, lon):
-	url = "https://api.open-meteo.com/v1/forecast"
+	"Make the api request to Open Meteo, using a latitude and longitude"
 	params = {
 		"latitude": lat,
 		"longitude": lon,
@@ -20,6 +28,7 @@ def make_request(lat, lon):
 		"timezone": "America/Sao_Paulo",
 		"forecast_days": 1,
 	}
+	
 	responses = openmeteo.weather_api(url, params = params)
 
 	# Process first location. Add a for-loop for multiple locations or weather models
@@ -72,11 +81,31 @@ def make_request(lat, lon):
 	return hourly_data, daily_data
 
 if __name__ == "__main__":
-	hourly_data, daily_data = make_request(-22.91944, -42.81861)
+	# Get cities locations
+	conn = psycopg.connect(
+		dbname="weather",
+		user="postgres",
+		host="localhost",
+		port="5432"
+	)
+	cur = conn.cursor()
 
-	for key, value in hourly_data.items():
-		print(f"{key}: {value}")
-
-		# Get cities locations
-		# Insert data to the database
-		# Finish the code
+	# Get cities lat and lon
+	cur.execute("SELECT latitude, longitude, city_id, timezone FROM cities")
+	while True:
+		for lat, lon, city_id, timezone in cur.fetchall():
+			print(f"Cidy_id: {city_id}\nLattude: {lat}\nLongitude: {lon}\nTimezone: {timezone}")			
+			# Insert data to the database
+			date = dt.date(dt.now(pytz.timezone(timezone)))
+			
+			cur.execute(f"SELECT * FROM daily WHERE city_id = {city_id} AND date = '{date}'")
+			if cur.fetchone():
+				continue
+			
+			hourly_data, daily_data = make_request(lat, lon)
+			# Insert to daily
+			cur.execute(f"INSERT INTO daily(weather_code, temperature_2m_max, temperature_2m_min, city_id, date) VALUES({daily_data["weather_code"][0]}, {daily_data["temperature_2m_max"][0]}, {daily_data["temperature_2m_min"][0]}, {city_id}, '{date}')")
+			conn.commit()
+			print(f"Inserted {city_id}")
+			
+			time.sleep(10)
