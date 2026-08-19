@@ -78,6 +78,20 @@ def make_request(lat, lon, timezone):
 	daily_data["temperature_2m_max"] = daily_temperature_2m_max
 	daily_data["temperature_2m_min"] = daily_temperature_2m_min
 
+	# Format Data
+	for key, values in hourly_data.items():
+		if key == "date":
+			continue
+		result = []
+
+		for value in values.tolist():
+			if key == "temperature_2m" or key == "apparent_temperature":
+				result.append(round(value))
+			else:
+				result.append(round(value, 2))
+
+		hourly_data[key] = result
+
 	return hourly_data, daily_data
 
 if __name__ == "__main__":
@@ -101,9 +115,10 @@ if __name__ == "__main__":
 			# Insert to daily
 			cur.execute(f"SELECT * FROM daily WHERE city_id = {city_id} AND date = '{date}'")
 			if not cur.fetchone():
-				cur.execute(f"INSERT INTO daily(weather_code, temperature_2m_max, temperature_2m_min, city_id, date) VALUES({daily_data["weather_code"][0]}, {daily_data["temperature_2m_max"][0]}, {daily_data["temperature_2m_min"][0]}, {city_id}, '{date}')")
+				cur.execute(f"INSERT INTO daily(weather_code, temperature_2m_max, temperature_2m_min, city_id, date) VALUES(\
+{daily_data["weather_code"][0]}, {daily_data["temperature_2m_max"][0]}, {daily_data["temperature_2m_min"][0]}, {city_id}, '{date}')")
 				conn.commit()
-				print(f"Inserted daily for: {name}\nID:{city_id}")
+				print(f"Inserted daily for: {name}")
 
 			# Insert to hourly
 			cur.execute(f"SELECT daily_id FROM daily WHERE city_id = {city_id} AND date = '{date}'")
@@ -111,23 +126,16 @@ if __name__ == "__main__":
 
 			cur.execute(f"SELECT * FROM hourly WHERE daily_id = {daily_id}")
 			if not cur.fetchone():
-				for key, values in hourly_data.items():
-					if key == "date":
-						continue
-					result = []
+				cur.execute(f"INSERT INTO hourly(daily_id, temperature_2m, apparent_temperature, precipitation, wind_speed_10m, wind_direction_10m, uv_index) VALUES(%s, %s, %s, %s, %s, %s, %s)", (
+					daily_id,
+					hourly_data["temperature_2m"],
+					hourly_data["apparent_temperature"],
+					hourly_data["precipitation"],
+					hourly_data["wind_speed_10m"],
+					hourly_data["wind_direction_10m"],
+					hourly_data["uv_index"]
+				))
 
-					for i, value in enumerate(values.tolist()):
-						if key == "temperature_2m" or key == "apparent_temperature":
-							result.append(round(value))
-						else:
-							result.append(round(value, 2))
-
-					hourly_data[key] = result
-					
-				print(f"Temperature: {hourly_data["temperature_2m"]}")
-
-				cur.execute(f"INSERT INTO hourly(daily_id, temperature_2m, apparent_temperature, precipitation, wind_speed_10m, wind_direction_10m, uv_index) VALUES(\
-{daily_id}, {hourly_data["temperature_2m"]}, {hourly_data["apparent_temperature"]}, {hourly_data["precipitation"]}, {hourly_data["wind_speed_10m"]}, {hourly_data["wind_direction_10m"]}, {hourly_data["uv_index"]})")
 				conn.commit()
 				print(f"Inserted hourly for: {name}\nID:{city_id}")
 
