@@ -18,14 +18,14 @@ openmeteo = openmeteo_requests.Client(session = retry_session)
 # The order of variables in hourly or daily is important to assign them correctly below
 url = "https://api.open-meteo.com/v1/forecast"
 
-def make_request(lat, lon):
+def make_request(lat, lon, timezone):
 	"Make the api request to Open Meteo, using a latitude and longitude"
 	params = {
 		"latitude": lat,
 		"longitude": lon,
 		"daily": ["weather_code", "temperature_2m_max", "temperature_2m_min"],
 		"hourly": ["temperature_2m", "precipitation", "wind_speed_10m", "wind_direction_10m", "uv_index", "apparent_temperature"],
-		"timezone": "America/Sao_Paulo",
+		"timezone": timezone,
 		"forecast_days": 1,
 	}
 	
@@ -91,21 +91,44 @@ if __name__ == "__main__":
 	cur = conn.cursor()
 
 	# Get cities lat and lon
-	cur.execute("SELECT latitude, longitude, city_id, timezone FROM cities")
 	while True:
-		for lat, lon, city_id, timezone in cur.fetchall():
-			print(f"Cidy_id: {city_id}\nLattude: {lat}\nLongitude: {lon}\nTimezone: {timezone}")			
+		cur.execute("SELECT name, latitude, longitude, city_id, timezone FROM cities ORDER BY name")
+		for name, lat, lon, city_id, timezone in cur.fetchall():			
 			# Insert data to the database
 			date = dt.date(dt.now(pytz.timezone(timezone)))
-			
-			cur.execute(f"SELECT * FROM daily WHERE city_id = {city_id} AND date = '{date}'")
-			if cur.fetchone():
-				continue
-			
-			hourly_data, daily_data = make_request(lat, lon)
+			hourly_data, daily_data = make_request(lat, lon, timezone)
+
 			# Insert to daily
-			cur.execute(f"INSERT INTO daily(weather_code, temperature_2m_max, temperature_2m_min, city_id, date) VALUES({daily_data["weather_code"][0]}, {daily_data["temperature_2m_max"][0]}, {daily_data["temperature_2m_min"][0]}, {city_id}, '{date}')")
-			conn.commit()
-			print(f"Inserted {city_id}")
-			
+			cur.execute(f"SELECT * FROM daily WHERE city_id = {city_id} AND date = '{date}'")
+			if not cur.fetchone():
+				cur.execute(f"INSERT INTO daily(weather_code, temperature_2m_max, temperature_2m_min, city_id, date) VALUES({daily_data["weather_code"][0]}, {daily_data["temperature_2m_max"][0]}, {daily_data["temperature_2m_min"][0]}, {city_id}, '{date}')")
+				conn.commit()
+				print(f"Inserted daily for: {name}\nID:{city_id}")
+
+			# Insert to hourly
+			cur.execute(f"SELECT daily_id FROM daily WHERE city_id = {city_id} AND date = '{date}'")
+			daily_id = cur.fetchone()[0]
+
+			cur.execute(f"SELECT * FROM hourly WHERE daily_id = {daily_id}")
+			if not cur.fetchone():
+				for key, values in hourly_data.items():
+					if key == "date":
+						continue
+					result = []
+
+					for i, value in enumerate(values.tolist()):
+						if key == "temperature_2m" or key == "apparent_temperature":
+							result.append(round(value))
+						else:
+							result.append(round(value, 2))
+
+					hourly_data[key] = result
+					
+				print(f"Temperature: {hourly_data["temperature_2m"]}")
+
+				cur.execute(f"INSERT INTO hourly(daily_id, temperature_2m, apparent_temperature, precipitation, wind_speed_10m, wind_direction_10m, uv_index) VALUES(\
+{daily_id}, {hourly_data["temperature_2m"]}, {hourly_data["apparent_temperature"]}, {hourly_data["precipitation"]}, {hourly_data["wind_speed_10m"]}, {hourly_data["wind_direction_10m"]}, {hourly_data["uv_index"]})")
+				conn.commit()
+				print(f"Inserted hourly for: {name}\nID:{city_id}")
+
 			time.sleep(10)
