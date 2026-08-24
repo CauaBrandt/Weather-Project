@@ -26,7 +26,7 @@ def make_request(lat, lon, timezone):
 		"daily": ["weather_code", "temperature_2m_max", "temperature_2m_min"],
 		"hourly": ["temperature_2m", "precipitation", "wind_speed_10m", "wind_direction_10m", "uv_index", "apparent_temperature"],
 		"timezone": timezone,
-		"forecast_days": 1,
+		"forecast_days": 2,
 	}
 	
 	responses = openmeteo.weather_api(url, params = params)
@@ -79,6 +79,18 @@ def make_request(lat, lon, timezone):
 	daily_data["temperature_2m_min"] = daily_temperature_2m_min
 
 	# Format Data
+	for key, values in daily_data.items():
+			result = []
+	
+			for value in values.tolist():
+				if key == "date":
+					result.append(dt.date(value))
+					continue
+
+				result.append(round(value))
+	
+			daily_data[key] = result
+	
 	for key, values in hourly_data.items():
 		if key == "date":
 			continue
@@ -113,20 +125,25 @@ if __name__ == "__main__":
 			hourly_data, daily_data = make_request(lat, lon, timezone)
 
 			# Insert to daily
-			cur.execute(f"SELECT * FROM daily WHERE city_id = {city_id} AND date = '{date}'")
+			cur.execute(f"SELECT * FROM daily WHERE city_id = %s AND date[1] = %s", (city_id, date))
 			if not cur.fetchone():
-				cur.execute(f"INSERT INTO daily(weather_code, temperature_2m_max, temperature_2m_min, city_id, date) VALUES(\
-{daily_data["weather_code"][0]}, {daily_data["temperature_2m_max"][0]}, {daily_data["temperature_2m_min"][0]}, {city_id}, '{date}')")
+				cur.execute("INSERT INTO daily(date, weather_code, temperature_2m_max, temperature_2m_min, city_id) VALUES(%s, %s, %s, %s, %s)", (
+					daily_data["date"],
+					daily_data["weather_code"],
+					daily_data["temperature_2m_max"],
+					daily_data["temperature_2m_min"],
+					city_id
+				))
 				conn.commit()
 				print(f"Inserted daily for: {name}")
 
 			# Insert to hourly
-			cur.execute(f"SELECT daily_id FROM daily WHERE city_id = {city_id} AND date = '{date}'")
+			cur.execute(f"SELECT daily_id FROM daily WHERE city_id = %s AND date[1] = %s", (city_id, date))
 			daily_id = cur.fetchone()[0]
 
 			cur.execute(f"SELECT * FROM hourly WHERE daily_id = {daily_id}")
 			if not cur.fetchone():
-				cur.execute(f"INSERT INTO hourly(daily_id, temperature_2m, apparent_temperature, precipitation, wind_speed_10m, wind_direction_10m, uv_index) VALUES(%s, %s, %s, %s, %s, %s, %s)", (
+				cur.execute("INSERT INTO hourly(daily_id, temperature_2m, apparent_temperature, precipitation, wind_speed_10m, wind_direction_10m, uv_index) VALUES(%s, %s, %s, %s, %s, %s, %s)", (
 					daily_id,
 					hourly_data["temperature_2m"],
 					hourly_data["apparent_temperature"],
