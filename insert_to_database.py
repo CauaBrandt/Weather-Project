@@ -2,7 +2,6 @@
 import psycopg
 # Import to use timer
 import time
-# Import date
 from datetime import datetime as dt
 import pytz
 import openmeteo_requests
@@ -26,7 +25,7 @@ def make_request(lat, lon, timezone):
 		"daily": ["weather_code", "temperature_2m_max", "temperature_2m_min"],
 		"hourly": ["temperature_2m", "precipitation", "wind_speed_10m", "wind_direction_10m", "uv_index", "apparent_temperature"],
 		"timezone": timezone,
-		"forecast_days": 2,
+		"forecast_days": 7
 	}
 	
 	responses = openmeteo.weather_api(url, params = params)
@@ -118,6 +117,15 @@ if __name__ == "__main__":
 
 	# Get cities lat and lon
 	while True:
+		# Remove older data from database
+		now = dt.date(dt.now())
+		cur.execute("SELECT daily_id FROM daily WHERE %s - date[1] > 7", (now,))
+
+		for daily_id in cur.fetchall():
+			cur.execute("DELETE FROM hourly WHERE daily_id = %s", (daily_id[0],))
+		cur.execute("DELETE FROM daily WHERE %s - date[1] > 7", (now,))
+		conn.commit()
+
 		cur.execute("SELECT name, latitude, longitude, city_id, timezone FROM cities ORDER BY name")
 		for name, lat, lon, city_id, timezone in cur.fetchall():			
 			# Insert data to the database
@@ -141,7 +149,7 @@ if __name__ == "__main__":
 			cur.execute(f"SELECT daily_id FROM daily WHERE city_id = %s AND date[1] = %s", (city_id, date))
 			daily_id = cur.fetchone()[0]
 
-			cur.execute(f"SELECT * FROM hourly WHERE daily_id = {daily_id}")
+			cur.execute(f"SELECT * FROM hourly WHERE daily_id = %s", (daily_id,))
 			if not cur.fetchone():
 				cur.execute("INSERT INTO hourly(daily_id, temperature_2m, apparent_temperature, precipitation, wind_speed_10m, wind_direction_10m, uv_index) VALUES(%s, %s, %s, %s, %s, %s, %s)", (
 					daily_id,
@@ -154,6 +162,6 @@ if __name__ == "__main__":
 				))
 
 				conn.commit()
-				print(f"Inserted hourly for: {name}\nID:{city_id}")
+				print(f"Inserted hourly for: {name}\nCity ID:{city_id}")
 
 			time.sleep(10)
