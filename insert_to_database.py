@@ -117,51 +117,52 @@ if __name__ == "__main__":
 
 	# Get cities lat and lon
 	while True:
-		# Remove older data from database
-		now = dt.date(dt.now())
-		cur.execute("SELECT daily_id FROM daily WHERE %s - date[1] > 7", (now,))
-
-		for daily_id in cur.fetchall():
-			cur.execute("DELETE FROM hourly WHERE daily_id = %s", (daily_id[0],))
-		cur.execute("DELETE FROM daily WHERE %s - date[1] > 7", (now,))
-		conn.commit()
-
 		cur.execute("SELECT name, latitude, longitude, city_id, timezone FROM cities ORDER BY name")
-		for name, lat, lon, city_id, timezone in cur.fetchall():			
-			# Insert data to the database
+		for name, lat, lon, city_id, timezone in cur.fetchall():
+			# Remove older data from database
 			date = dt.date(dt.now(pytz.timezone(timezone)))
+			cur.execute("SELECT daily_id FROM daily WHERE %s - date[1] > 7", (date,))
+
+			for daily_id in cur.fetchall():
+				cur.execute("DELETE FROM hourly WHERE daily_id = %s", (daily_id[0],))
+			cur.execute("DELETE FROM daily WHERE %s - date[1] > 7", (date,))
+			conn.commit()
+
+			# Skip already in database
+			cur.execute("SELECT daily_id FROM daily WHERE city_id = %s AND date[1] = %s", (city_id, date))
+			daily_id = cur.fetchone()
+			if daily_id:
+				continue
+
+			# Get Data
 			hourly_data, daily_data = make_request(lat, lon, timezone)
 
 			# Insert to daily
-			cur.execute(f"SELECT * FROM daily WHERE city_id = %s AND date[1] = %s", (city_id, date))
-			if not cur.fetchone():
-				cur.execute("INSERT INTO daily(date, weather_code, temperature_2m_max, temperature_2m_min, city_id) VALUES(%s, %s, %s, %s, %s)", (
-					daily_data["date"],
-					daily_data["weather_code"],
-					daily_data["temperature_2m_max"],
-					daily_data["temperature_2m_min"],
-					city_id
-				))
-				conn.commit()
-				print(f"Inserted daily for: {name}")
+			cur.execute("INSERT INTO daily(date, weather_code, temperature_2m_max, temperature_2m_min, city_id) VALUES(%s, %s, %s, %s, %s)", (
+				daily_data["date"],
+				daily_data["weather_code"],
+				daily_data["temperature_2m_max"],
+				daily_data["temperature_2m_min"],
+				city_id
+			))
+			conn.commit()
+			print(f"Inserted daily for: {name}")
 
 			# Insert to hourly
 			cur.execute(f"SELECT daily_id FROM daily WHERE city_id = %s AND date[1] = %s", (city_id, date))
 			daily_id = cur.fetchone()[0]
 
-			cur.execute(f"SELECT * FROM hourly WHERE daily_id = %s", (daily_id,))
-			if not cur.fetchone():
-				cur.execute("INSERT INTO hourly(daily_id, temperature_2m, apparent_temperature, precipitation, wind_speed_10m, wind_direction_10m, uv_index) VALUES(%s, %s, %s, %s, %s, %s, %s)", (
-					daily_id,
-					hourly_data["temperature_2m"],
-					hourly_data["apparent_temperature"],
-					hourly_data["precipitation"],
-					hourly_data["wind_speed_10m"],
-					hourly_data["wind_direction_10m"],
-					hourly_data["uv_index"]
-				))
+			cur.execute("INSERT INTO hourly(daily_id, temperature_2m, apparent_temperature, precipitation, wind_speed_10m, wind_direction_10m, uv_index) VALUES(%s, %s, %s, %s, %s, %s, %s)", (
+				daily_id,
+				hourly_data["temperature_2m"],
+				hourly_data["apparent_temperature"],
+				hourly_data["precipitation"],
+				hourly_data["wind_speed_10m"],
+				hourly_data["wind_direction_10m"],
+				hourly_data["uv_index"]
+			))
 
-				conn.commit()
-				print(f"Inserted hourly for: {name}\nCity ID:{city_id}")
+			conn.commit()
+			print(f"Inserted hourly for: {name}\nCity ID:{city_id}")
 
 			time.sleep(10)
