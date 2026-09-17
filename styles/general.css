@@ -1,0 +1,25 @@
+body {
+    background-color: rgb(0, 90, 115);
+    padding: 70px 0 4000px 0;
+}
+p {
+    color: white;
+    font-family: Roboto, Arial;
+    font-size: 14px;
+    
+    margin: 0;
+}
+.current-weather-container {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    vertical-align: top;
+}
+.current-weather-text,
+.city,
+.date {
+    font-size: 30px;
+    font-weight: 700;
+}
+.date {
+    justify-self: end;
+}

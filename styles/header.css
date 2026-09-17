@@ -1,0 +1,29 @@
+.header {
+    display: flex;
+    background-color: rgb(20, 180, 230);
+    height: 55px;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+
+    top: 0;
+    left: 0;
+    right: 0;
+}
+.search-bar-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 700px;
+}
+.search-bar {
+    border: 1px solid rgba(0, 0, 0 , 0.4);
+    border-radius: 20px;
+    width: 100%;
+    height: 40px;
+    padding: 0 10px 0 15px;
+}
+.search-bar:focus {
+    outline: none;
+}
