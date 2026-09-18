@@ -4,9 +4,9 @@
 }
 .daily-info {
     display: flex;
+    margin-bottom: 50px;
 }
 .weather-image {
-    background-color: yellow;
     width: 150px;
     height: 150px;
 }
@@ -29,13 +29,28 @@
     margin-top: 10px;
 }
 .temperature {
+    position: relative;
     font-size: 50px;
     font-weight: 500;
+
+    margin-right: 40px;
+}
+.temperature span {
+    position: absolute;
+    font-size: 25px;
+    top: 6px;
 }
 .apparent-temperature {
     font-size: 15px;
 }
-.apparent-temperature span {
+.apparent-temperature-number {
+    position: relative;
     font-size: 30px;
     font-weight: 500;
+    margin-left: 10px;
+}
+.apparent-temperature-degree {
+    position: absolute;
+    font-size: 15px;
+    top: 4px;
 }

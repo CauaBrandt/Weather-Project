@@ -6,6 +6,7 @@
         <link rel="stylesheet" href="../styles/general.css">
         <link rel="stylesheet" href="../styles/header.css">
         <link rel="stylesheet" href="../styles/daily_info.css">
+        <link rel="stylesheet" href="../styles/graph.css">
 
         <!-- Get Roboto Font -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,8 +16,17 @@
     </head>
     <body>
         <header class="header">
+            <div class="left"></div>
             <div class="search-bar-container">
                 <input class="search-bar" type="text" placeholder="Search">
+                <button class="search-button">
+                    <img src="../Icons/Search.svg">
+                </button>
+            </div>
+            <div class="right">
+                <button class="degree-change">
+                    Celsius
+                </button>
             </div>
         </header>
         <main class="info">
@@ -26,14 +36,17 @@
                 <p class="date">16.09.2026</p>
             </div>
             <div class="daily-info">
-                <img class="weather-image" src="">
+                <img class="weather-image" src="../Icons/Sun.svg">
                 <div class="daily-weather-info">
                     <p class="weather-code">Sunny</p>
                     <div class="temperature-container">
-                        <p class="temperature">19 &#176;C</p>
-                        <p class="apparent-temperature">Feels like <span>14 &#176;C</span></p>
+                        <p class="temperature">19 <span>&#176;C</span></p>
+                        <p class="apparent-temperature">Feels like <span class="apparent-temperature-number">14 <span class="apparent-temperature-degree">&#176;C</span></span> </p>
                     </div>
-                </div>                
+                </div>
+            </div>
+            <div class="graph">
+                Graph
             </div>
         </main>
     </body>
