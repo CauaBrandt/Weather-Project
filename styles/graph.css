@@ -1,6 +1,22 @@
 .graph {
+    position: relative;
     background-color: gray;
     height: 200px;
 
-    margin: 0 150px;
+    margin: 0 150px 50px;
+}
+.extra-info {
+    position: absolute;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+    height: 20px;
+    align-items: center;
+
+    top: -20px;
+    left: 0;
+    right: 0;
+}
+.extra-info p {
+    font-size: 17px;
+    font-weight: 500;
 }

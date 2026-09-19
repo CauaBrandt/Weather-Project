@@ -1,0 +1,54 @@
+.forecast {
+    background-color: rgb(30, 30, 60);
+    width: 400px;
+    height: 1090px;
+}
+#day-info {
+    display: flex;
+    border: 4px solid rgb(60, 60, 90);
+    border-bottom: 0;
+    height: 146px;
+    margin: 0px 20px;
+}
+#day-info:first-child {
+    margin-top: 20px;
+}
+#day-info:last-child {
+    height: 142px;
+    border-bottom: 4px solid rgb(60, 60, 90);
+    margin-bottom: 20px;
+}
+.day-weather {
+    height: 100%;
+}
+.temperature-max-min {
+    display: flex;
+    flex-direction: column;
+
+    margin-left: 20px;
+}
+.temperature-max-min p {
+    flex: 1;
+}
+#max,
+#min {
+    position: relative;
+    font-size: 25px;
+    font-weight: 500;
+}
+#week-day {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+#max {
+    align-items: end;
+}
+#max span,
+#min span {
+    position: absolute;
+    font-size: 13px;
+
+    top: 3px;
+}
