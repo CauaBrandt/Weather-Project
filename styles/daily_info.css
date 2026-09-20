@@ -1,4 +1,4 @@
-.info {
+#info {
     display: flex;
     flex-direction: column;
 }
@@ -9,6 +9,11 @@
 .weather-image {
     width: 150px;
     height: 150px;
+    transition: width .2s, height .2s;
+}
+.weather-image:hover {
+    width: 180px;
+    height: 180px;
 }
 .daily-weather-info {
     margin-left: 10px;

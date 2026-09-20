@@ -1,4 +1,8 @@
-.forecast {
+#forecast-map {
+    display: flex;
+    align-items: center;
+}
+#forecast {
     background-color: rgb(30, 30, 60);
     width: 400px;
     height: 1090px;
@@ -9,6 +13,10 @@
     border-bottom: 0;
     height: 146px;
     margin: 0px 20px;
+    opacity: .9;
+}
+#day-info:hover {
+    opacity: 1;
 }
 #day-info:first-child {
     margin-top: 20px;
@@ -19,13 +27,12 @@
     margin-bottom: 20px;
 }
 .day-weather {
-    height: 100%;
+    height: 130px;
+    margin: 8px 15px 0 10px;
 }
 .temperature-max-min {
     display: flex;
     flex-direction: column;
-
-    margin-left: 20px;
 }
 .temperature-max-min p {
     flex: 1;
@@ -37,11 +44,10 @@
     font-weight: 500;
 }
 #week-day {
-    font-size: 20px;
+    font-size: 25px;
     font-weight: 700;
-    margin-bottom: 10px;
+    margin: 10px 0 0;
 }
-
 #max {
     align-items: end;
 }
@@ -51,4 +57,12 @@
     font-size: 13px;
 
     top: 3px;
+}
+
+#map {
+    flex: 1;
+    border: 10px solid black;
+    background-color: gray;
+    height: 750px;
+    margin: 0 100px 0 400px;
 }

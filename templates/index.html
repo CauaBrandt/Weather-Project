@@ -13,24 +13,31 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    
+        
+        <!-- Get LeafLet CSS -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+            crossorigin=""/>
     </head>
     <body>
-        <header class="header">
-            <div class="left"></div>
-            <div class="search-bar-container">
-                <input class="search-bar" type="text" placeholder="Search">
-                <button class="search-button">
-                    <img src="../Icons/Search.svg">
-                </button>
+        <header id="header">
+            <div id="left"></div>
+            <div id="middle">
+                <div id="search-bar-container">
+                    <input id="search-bar" type="text" placeholder="Search">
+                    <button id="search-button">
+                        <img src="../Icons/Search.svg">
+                    </button>
+                </div>
             </div>
-            <div class="right">
-                <button class="degree-change">
-                    Celsius
+            <div id="right">
+                <button id="degree-change">
+                    <p>&#176;C</p>
+                    <img src="../Icons/DownArrow.svg">
                 </button>
             </div>
         </header>
-        <main class="info">
+        <main id="info">
             <div class="current-weather-container">
                 <p class="current-weather-text">Current weather</p>
                 <p class="city">Maricá, Rio de Janeiro, Brasil</p>
@@ -57,64 +64,72 @@
                     <p class="wind-direction">Wind Direction</p>
                 </div>
             </div>
-            <div class="forecast">
-                <div id="day-info">
-                    <img class="day-weather" src="../Icons/Sun.svg">
-                    <div class="temperature-max-min">
-                        <p id="week-day">Saturday</p>
-                        <p id="max">30 <span>&#176;C</span></p>
-                        <p id="min">20 <span>&#176;C</span></p>
+            <div id="forecast-map">
+                <div id="forecast">
+                    <div id="day-info">
+                        <img class="day-weather" src="../Icons/Sun.svg">
+                        <div class="temperature-max-min">
+                            <p id="week-day">Thursday</p>
+                            <p id="max">30 <span>&#176;C</span></p>
+                            <p id="min">20 <span>&#176;C</span></p>
+                        </div>
+                    </div>
+                    <div id="day-info">
+                        <img class="day-weather" src="../Icons/Cloud.svg">
+                        <div class="temperature-max-min">
+                            <p id="week-day">Friday</p>
+                            <p id="max">30 <span>&#176;C</span></p>
+                            <p id="min">20 <span>&#176;C</span></p>
+                        </div>
+                    </div>
+                    <div id="day-info">
+                        <img class="day-weather" src="../Icons/SunRainCloud.svg">
+                        <div class="temperature-max-min">
+                            <p id="week-day">Saturday</p>
+                            <p id="max">30 <span>&#176;C</span></p>
+                            <p id="min">20 <span>&#176;C</span></p>
+                        </div>
+                    </div>
+                    <div id="day-info">
+                        <img class="day-weather" src="../Icons/RainCloud.svg">
+                        <div class="temperature-max-min">
+                            <p id="week-day">Sunday</p>
+                            <p id="max">30 <span>&#176;C</span></p>
+                            <p id="min">20 <span>&#176;C</span></p>
+                        </div>
+                    </div>
+                    <div id="day-info">
+                        <img class="day-weather" src="../Icons/ThunderCloud.svg">
+                        <div class="temperature-max-min">
+                            <p id="week-day">Monday</p>
+                            <p id="max">30 <span>&#176;C</span></p>
+                            <p id="min">20 <span>&#176;C</span></p>
+                        </div>
+                    </div>
+                    <div id="day-info">
+                        <img class="day-weather" src="../Icons/Cloud.svg">
+                        <div class="temperature-max-min">
+                            <p id="week-day">Tuesday</p>
+                            <p id="max">30 <span>&#176;C</span></p>
+                            <p id="min">20 <span>&#176;C</span></p>
+                        </div>
+                    </div>
+                    <div id="day-info">
+                        <img class="day-weather" src="../Icons/Sun.svg">
+                        <div class="temperature-max-min">
+                            <p id="week-day">Wednesday</p>
+                            <p id="max">30 <span>&#176;C</span></p>
+                            <p id="min">20 <span>&#176;C</span></p>
+                        </div>
                     </div>
                 </div>
-                <div id="day-info">
-                    <img class="day-weather" src="../Icons/Sun.svg">
-                    <div class="temperature-max-min">
-                        <p id="week-day">Saturday</p>
-                        <p id="max">30 <span>&#176;C</span></p>
-                        <p id="min">20 <span>&#176;C</span></p>
-                    </div>
-                </div>
-                <div id="day-info">
-                    <img class="day-weather" src="../Icons/Sun.svg">
-                    <div class="temperature-max-min">
-                        <p id="week-day">Saturday</p>
-                        <p id="max">30 <span>&#176;C</span></p>
-                        <p id="min">20 <span>&#176;C</span></p>
-                    </div>
-                </div>
-                <div id="day-info">
-                    <img class="day-weather" src="../Icons/Sun.svg">
-                    <div class="temperature-max-min">
-                        <p id="week-day">Saturday</p>
-                        <p id="max">30 <span>&#176;C</span></p>
-                        <p id="min">20 <span>&#176;C</span></p>
-                    </div>
-                </div>
-                <div id="day-info">
-                    <img class="day-weather" src="../Icons/Sun.svg">
-                    <div class="temperature-max-min">
-                        <p id="week-day">Saturday</p>
-                        <p id="max">30 <span>&#176;C</span></p>
-                        <p id="min">20 <span>&#176;C</span></p>
-                    </div>
-                </div>
-                <div id="day-info">
-                    <img class="day-weather" src="../Icons/Sun.svg">
-                    <div class="temperature-max-min">
-                        <p id="week-day">Saturday</p>
-                        <p id="max">30 <span>&#176;C</span></p>
-                        <p id="min">20 <span>&#176;C</span></p>
-                    </div>
-                </div>
-                <div id="day-info">
-                    <img class="day-weather" src="../Icons/Sun.svg">
-                    <div class="temperature-max-min">
-                        <p id="week-day">Saturday</p>
-                        <p id="max">30 <span>&#176;C</span></p>
-                        <p id="min">20 <span>&#176;C</span></p>
-                    </div>
-                </div>
+                <div id="map"></div>                
             </div>
         </main>
+
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+                integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+                crossorigin=""></script>
+        <script src="../map.js"></script>
     </body>
 </html>

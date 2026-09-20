@@ -1,9 +1,9 @@
 .graph {
     position: relative;
     background-color: gray;
-    height: 200px;
+    height: 300px;
 
-    margin: 0 150px 50px;
+    margin-bottom: 50px;
 }
 .extra-info {
     position: absolute;
