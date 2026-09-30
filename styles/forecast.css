@@ -26,15 +26,15 @@
     border-bottom: 4px solid rgb(60, 60, 90);
     margin-bottom: 20px;
 }
-.day-weather {
+#day-weather {
     height: 130px;
     margin: 8px 15px 0 10px;
 }
-.temperature-max-min {
+#temperature-max-min {
     display: flex;
     flex-direction: column;
 }
-.temperature-max-min p {
+#temperature-max-min p {
     flex: 1;
 }
 #max,
@@ -66,4 +66,5 @@
     max-width: 1125px;
     height: 750px;
     margin: 0 auto 0 auto;
+    z-index: 5;
 }

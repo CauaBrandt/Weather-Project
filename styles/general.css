@@ -1,5 +1,7 @@
 body {
-    background-color: rgb(0, 90, 115);
+    position: relative;
+    background-image: url("../Images/Sky.jpg");
+    background-color: rgb(23, 58, 214);
     padding: 70px 10px 4000px;
 }
 p {
@@ -9,18 +11,18 @@ p {
     
     margin: 0;
 }
-.current-weather-container {
+#current-weather-container {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     vertical-align: top;
     margin-bottom: 20px;
 }
-.current-weather-text,
-.city,
-.date {
+#current-weather-text,
+#city,
+#date {
     font-size: 30px;
     font-weight: 700;
 }
-.date {
+#date {
     justify-self: end;
 }

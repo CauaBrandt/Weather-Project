@@ -2,59 +2,62 @@
     display: flex;
     flex-direction: column;
 }
-.daily-info {
+#daily-info {
     display: flex;
     margin-bottom: 50px;
 }
-.weather-image {
+#weather-image {
     width: 150px;
     height: 150px;
     transition: width .2s, height .2s;
 }
-.weather-image:hover {
+#weather-image:hover {
     width: 180px;
     height: 180px;
 }
-.daily-weather-info {
+#daily-weather-info {
     margin-left: 10px;
     flex: 1;
     display: flex;
     flex-direction: column;
 }
-.weather-code {
+#weather-code {
     font-size: 20px;
     font-weight: 700;
 
     padding: 15px 0;
 }
-.temperature-container {
+#temperature-container {
     display: flex;
     align-items: center;
 
     margin-top: 10px;
 }
-.temperature {
+#temperature  {
     position: relative;
+}
+#temperature .temperature{
     font-size: 50px;
     font-weight: 500;
 
     margin-right: 40px;
 }
-.temperature span {
+#temperature .degree {
     position: absolute;
     font-size: 25px;
     top: 6px;
+    right: 15px;
 }
-.apparent-temperature {
+#apparent-temperature {
     font-size: 15px;
 }
-.apparent-temperature-number {
+#apparent-temperature-number {
     position: relative;
     font-size: 30px;
     font-weight: 500;
     margin-left: 10px;
 }
-.apparent-temperature-degree {
+#apparent-temperature-degree {
     position: absolute;
     font-size: 15px;
     top: 4px;
