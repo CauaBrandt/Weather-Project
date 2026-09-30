@@ -51,10 +51,9 @@
 #max {
     align-items: end;
 }
-#max span,
-#min span {
+#temperature-max-min .degree {
     position: absolute;
-    font-size: 13px;
+    font-size: 14px;
 
     top: 3px;
 }
