@@ -3,11 +3,11 @@
     <head>
         <title>Weather</title>
 
-        <link rel="stylesheet" href="../styles/general.css">
-        <link rel="stylesheet" href="../styles/header.css">
-        <link rel="stylesheet" href="../styles/daily_info.css">
-        <link rel="stylesheet" href="../styles/graph.css">
-        <link rel="stylesheet" href="../styles/forecast.css">
+        <link rel="stylesheet" href="../static/styles/general.css">
+        <link rel="stylesheet" href="../static/styles/header.css">
+        <link rel="stylesheet" href="../static/styles/daily_info.css">
+        <link rel="stylesheet" href="../static/styles/graph.css">
+        <link rel="stylesheet" href="../static/styles/forecast.css">
 
         <!-- Get Roboto Font -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,14 +26,14 @@
                 <div id="search-bar-container">
                     <input id="search-bar" type="text" placeholder="Search">
                     <button id="search-button">
-                        <img src="../Icons/Search.svg">
+                        <img src="../static/Icons/Search.svg">
                     </button>
                 </div>
             </div>
             <div id="right">
                 <button id="degree-change">
                     <p class="degree">&#176;C</p>
-                    <img src="../Icons/DownArrow.svg">
+                    <img src="../static/Icons/DownArrow.svg">
                 </button>
             </div>
         </header>
@@ -44,7 +44,7 @@
                 <p id="date">16.09.2026</p>
             </div>
             <div id="daily-info">
-                <img id="weather-image" src="../Icons/Sun.svg">
+                <img id="weather-image" src="../static/Icons/Sun.svg">
                 <div id="daily-weather-info">
                     <p id="weather-code">Sunny</p>
                     <div id="temperature-container">
@@ -67,7 +67,7 @@
             <div id="forecast-map">
                 <div id="forecast">
                     <div id="day-info">
-                        <img id="day-weather" src="../Icons/Sun.svg">
+                        <img id="day-weather" src="../static/Icons/Sun.svg">
                         <div id="temperature-max-min">
                             <p id="week-day">Thursday</p>
                             <p id="max"><span class="temperature">30</span> <span class="degree">&#176;C</span></p>
@@ -75,7 +75,7 @@
                         </div>
                     </div>
                     <div id="day-info">
-                        <img id="day-weather" src="../Icons/Cloud.svg">
+                        <img id="day-weather" src="../static/Icons/Cloud.svg">
                         <div id="temperature-max-min">
                             <p id="week-day">Friday</p>
                             <p id="max"><span class="temperature">30</span> <span class="degree">&#176;C</span></p>
@@ -83,7 +83,7 @@
                         </div>
                     </div>
                     <div id="day-info">
-                        <img id="day-weather" src="../Icons/SunRainCloud.svg">
+                        <img id="day-weather" src="../static/Icons/SunRainCloud.svg">
                         <div id="temperature-max-min">
                             <p id="week-day">Saturday</p>
                             <p id="max"><span class="temperature">30</span> <span class="degree">&#176;C</span></p>
@@ -91,7 +91,7 @@
                         </div>
                     </div>
                     <div id="day-info">
-                        <img id="day-weather" src="../Icons/RainCloud.svg">
+                        <img id="day-weather" src="../static/Icons/RainCloud.svg">
                         <div id="temperature-max-min">
                             <p id="week-day">Sunday</p>
                             <p id="max"><span class="temperature">30</span> <span class="degree">&#176;C</span></p>
@@ -99,7 +99,7 @@
                         </div>
                     </div>
                     <div id="day-info">
-                        <img id="day-weather" src="../Icons/ThunderCloud.svg">
+                        <img id="day-weather" src="../static/Icons/ThunderCloud.svg">
                         <div id="temperature-max-min">
                             <p id="week-day">Monday</p>
                             <p id="max"><span class="temperature">30</span> <span class="degree">&#176;C</span></p>
@@ -107,7 +107,7 @@
                         </div>
                     </div>
                     <div id="day-info">
-                        <img id="day-weather" src="../Icons/Cloud.svg">
+                        <img id="day-weather" src="../static/Icons/Cloud.svg">
                         <div id="temperature-max-min">
                             <p id="week-day">Tuesday</p>
                             <p id="max"><span class="temperature">30</span> <span class="degree">&#176;C</span></p>
@@ -115,7 +115,7 @@
                         </div>
                     </div>
                     <div id="day-info">
-                        <img id="day-weather" src="../Icons/Sun.svg">
+                        <img id="day-weather" src="../static/Icons/Sun.svg">
                         <div id="temperature-max-min">
                             <p id="week-day">Wednesday</p>
                             <p id="max"><span class="temperature">30</span> <span class="degree">&#176;C</span></p>
@@ -130,8 +130,8 @@
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
                 integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
                 crossorigin=""></script>
-        <script src="../Scripts/map.js"></script>
-        <script src="../Scripts/daily_info.js"></script>
-        <script src="../Scripts/header.js"></script>
+        <script src="../static/Scripts/map.js"></script>
+        <script src="../static/Scripts/daily_info.js"></script>
+        <script src="../static/Scripts/header.js"></script>
     </body>
 </html>
