@@ -40,41 +40,45 @@
         <main id="info">
             <div id="current-weather-container">
                 <p id="current-weather-text">Current weather</p>
-                <p id="city">Maricá, Rio de Janeiro, Brasil</p>
-                <p id="date">16.09.2026</p>
+                <p id="city">{{ city }}, {{ state }}</p>
+                <p id="date"></p>
             </div>
             <div id="daily-info">
                 <img id="weather-image" src="../static/Icons/Sun.svg">
                 <div id="daily-weather-info">
                     <p id="weather-code">Sunny</p>
                     <div id="temperature-container">
-                        <p id="temperature"><span class="temperature">19</span> <span class="degree">&#176;C</span></p>
-                        <p id="apparent-temperature">Feels like <span class="temperature apparent-temperature-number">14</span><span class="degree apparent-temperature-degree">&#176;C</span> </p>
+                        <p id="temperature"><span class="temperature">{{ current_temperature }}</span> <span class="degree">&#176;C</span></p>
+                        <p id="apparent-temperature">Feels like <span class="temperature apparent-temperature-number">{{ current_apparent_temperature }}</span><span class="degree apparent-temperature-degree">&#176;C</span> </p>
                     </div>
                 </div>
             </div>
             <div class="graph">
                 Graph
                 <div class="extra-info">
-                    <p class="air-quality">Air quality</p>
-                    <p class="humidity">Humidity</p>
-                    <p class="preciptation-chance">Preciptation</p>
-                    <p class="visibilty">Visibility</p>
-                    <p class="wind-speed">Wind Speed</p>
-                    <p class="wind-direction">Wind Direction</p>
+                    <p class="air-quality">Air quality: {{ air_quality }}</p>
+                    <p class="humidity">Humidity: {{ humidity }}</p>
+                    <p class="preciptation-chance">Preciptation: {{ preciptation_chance }}</p>
+                    <p class="visibilty">Visibility: {{ Visibility }}</p>
+                    <p class="wind-speed">Wind Speed: {{ wind_speed }}</p>
+                    <p class="wind-direction">Wind Direction: {{ wind_direction }}</p>
                 </div>
             </div>
             <div id="forecast-map">
                 <div id="forecast">
+                    {% for max, min in forecast %}
                     <div id="day-info">
-                        <img id="day-weather" src="../static/Icons/Sun.svg">
+                        {% if True %}
+                            <img id="day-weather" src="../static/Icons/RainCloud.svg">
+                        {% endif %}
                         <div id="temperature-max-min">
                             <p id="week-day">Thursday</p>
-                            <p id="max"><span class="temperature">30</span> <span class="degree">&#176;C</span></p>
-                            <p id="min"><span class="temperature">20</span> <span class="degree">&#176;C</span></p>
+                            <p id="max"><span class="temperature">{{ max }}</span> <span class="degree">&#176;C</span></p>
+                            <p id="min"><span class="temperature">{{ min }}</span> <span class="degree">&#176;C</span></p>
                         </div>
                     </div>
-                    <div id="day-info">
+                    {% endfor %}
+                    <!-- <div id="day-info">
                         <img id="day-weather" src="../static/Icons/Cloud.svg">
                         <div id="temperature-max-min">
                             <p id="week-day">Friday</p>
@@ -121,7 +125,7 @@
                             <p id="max"><span class="temperature">30</span> <span class="degree">&#176;C</span></p>
                             <p id="min"><span class="temperature">20</span> <span class="degree">&#176;C</span></p>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
                 <div id="map"></div>                
             </div>
