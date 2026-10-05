@@ -59,73 +59,25 @@
                     <p class="air-quality">Air quality: {{ air_quality }}</p>
                     <p class="humidity">Humidity: {{ humidity }}</p>
                     <p class="preciptation-chance">Preciptation: {{ preciptation_chance }}</p>
-                    <p class="visibilty">Visibility: {{ Visibility }}</p>
+                    <p class="visibilty">Visibility: {{ visibility }}</p>
                     <p class="wind-speed">Wind Speed: {{ wind_speed }}</p>
                     <p class="wind-direction">Wind Direction: {{ wind_direction }}</p>
                 </div>
             </div>
             <div id="forecast-map">
                 <div id="forecast">
-                    {% for max, min in forecast %}
+                    {% for max, min, weekday in forecast %}
                     <div id="day-info">
                         {% if True %}
                             <img id="day-weather" src="../static/Icons/RainCloud.svg">
                         {% endif %}
                         <div id="temperature-max-min">
-                            <p id="week-day">Thursday</p>
+                            <p id="week-day">{{ weekday }}</p>
                             <p id="max"><span class="temperature">{{ max }}</span> <span class="degree">&#176;C</span></p>
                             <p id="min"><span class="temperature">{{ min }}</span> <span class="degree">&#176;C</span></p>
                         </div>
                     </div>
                     {% endfor %}
-                    <!-- <div id="day-info">
-                        <img id="day-weather" src="../static/Icons/Cloud.svg">
-                        <div id="temperature-max-min">
-                            <p id="week-day">Friday</p>
-                            <p id="max"><span class="temperature">30</span> <span class="degree">&#176;C</span></p>
-                            <p id="min"><span class="temperature">20</span> <span class="degree">&#176;C</span></p>
-                        </div>
-                    </div>
-                    <div id="day-info">
-                        <img id="day-weather" src="../static/Icons/SunRainCloud.svg">
-                        <div id="temperature-max-min">
-                            <p id="week-day">Saturday</p>
-                            <p id="max"><span class="temperature">30</span> <span class="degree">&#176;C</span></p>
-                            <p id="min"><span class="temperature">20</span> <span class="degree">&#176;C</span></p>
-                        </div>
-                    </div>
-                    <div id="day-info">
-                        <img id="day-weather" src="../static/Icons/RainCloud.svg">
-                        <div id="temperature-max-min">
-                            <p id="week-day">Sunday</p>
-                            <p id="max"><span class="temperature">30</span> <span class="degree">&#176;C</span></p>
-                            <p id="min"><span class="temperature">20</span> <span class="degree">&#176;C</span></p>
-                        </div>
-                    </div>
-                    <div id="day-info">
-                        <img id="day-weather" src="../static/Icons/ThunderCloud.svg">
-                        <div id="temperature-max-min">
-                            <p id="week-day">Monday</p>
-                            <p id="max"><span class="temperature">30</span> <span class="degree">&#176;C</span></p>
-                            <p id="min"><span class="temperature">20</span> <span class="degree">&#176;C</span></p>
-                        </div>
-                    </div>
-                    <div id="day-info">
-                        <img id="day-weather" src="../static/Icons/Cloud.svg">
-                        <div id="temperature-max-min">
-                            <p id="week-day">Tuesday</p>
-                            <p id="max"><span class="temperature">30</span> <span class="degree">&#176;C</span></p>
-                            <p id="min"><span class="temperature">20</span> <span class="degree">&#176;C</span></p>
-                        </div>
-                    </div>
-                    <div id="day-info">
-                        <img id="day-weather" src="../static/Icons/Sun.svg">
-                        <div id="temperature-max-min">
-                            <p id="week-day">Wednesday</p>
-                            <p id="max"><span class="temperature">30</span> <span class="degree">&#176;C</span></p>
-                            <p id="min"><span class="temperature">20</span> <span class="degree">&#176;C</span></p>
-                        </div>
-                    </div> -->
                 </div>
                 <div id="map"></div>                
             </div>

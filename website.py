@@ -1,7 +1,7 @@
 import psycopg
 import pytz
 from flask import Flask, render_template, redirect, url_for
-from datetime import datetime as dt
+from datetime import datetime as dt, date
 from insert_to_database import make_request
 
 class City():
@@ -22,7 +22,11 @@ def home():
         state=city.state,
         current_temperature=current_temperature,
         current_apparent_temperature=current_apparent_temperature,
-        forecast=list(zip(daily_data["temperature_2m_max"], daily_data["temperature_2m_min"]))
+        forecast=list(zip(
+            daily_data["temperature_2m_max"],
+            daily_data["temperature_2m_min"],
+            names
+        ))
     )
 
 if __name__ == "__main__":
@@ -49,5 +53,8 @@ if __name__ == "__main__":
     else:
         current_temperature = hourly_data["temperature_2m"][24 + now.hour - 3]
         current_apparent_temperature = hourly_data["apparent_temperature"][24 + now.hour - 3]
+
+    days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    names = [days[(date.today().weekday() + i) % 7] for i in range(0, 7)]
     
     app.run(debug=True)
