@@ -44,9 +44,9 @@
                 <p id="date"></p>
             </div>
             <div id="daily-info">
-                <img id="weather-image" src="../static/Icons/Sun.svg">
+                <img id="weather-image" src="{{ url_for('static', filename='Icons/' ~ current_icon) }}">
                 <div id="daily-weather-info">
-                    <p id="weather-code">Sunny</p>
+                    <p id="weather-code">{{ current_weather }}</p>
                     <div id="temperature-container">
                         <p id="temperature"><span class="temperature">{{ current_temperature }}</span> <span class="degree">&#176;C</span></p>
                         <p id="apparent-temperature">Feels like <span class="temperature apparent-temperature-number">{{ current_apparent_temperature }}</span><span class="degree apparent-temperature-degree">&#176;C</span> </p>
@@ -58,19 +58,17 @@
                 <div class="extra-info">
                     <p class="air-quality">Air quality: {{ air_quality }}</p>
                     <p class="humidity">Humidity: {{ humidity }}</p>
-                    <p class="preciptation-chance">Preciptation: {{ preciptation_chance }}</p>
+                    <p class="preciptation-chance">Precipitation: {{ precipitation_chance }}</p>
                     <p class="visibilty">Visibility: {{ visibility }}</p>
-                    <p class="wind-speed">Wind Speed: {{ wind_speed }}</p>
+                    <p class="wind-speed">Wind Speed: {{ wind_speed }} Km/h</p>
                     <p class="wind-direction">Wind Direction: {{ wind_direction }}</p>
                 </div>
             </div>
             <div id="forecast-map">
                 <div id="forecast">
-                    {% for max, min, weekday in forecast %}
+                    {% for max, min, weekday, icon in forecast %}
                     <div id="day-info">
-                        {% if True %}
-                            <img id="day-weather" src="../static/Icons/RainCloud.svg">
-                        {% endif %}
+                        <img id="day-weather" src="{{ url_for('static', filename='Icons/' ~ icon) }}">
                         <div id="temperature-max-min">
                             <p id="week-day">{{ weekday }}</p>
                             <p id="max"><span class="temperature">{{ max }}</span> <span class="degree">&#176;C</span></p>

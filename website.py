@@ -20,14 +20,44 @@ def home():
         "index.html",
         city=city.name,
         state=city.state,
+        current_icon=current_icon,
+        current_weather=current_weather,
         current_temperature=current_temperature,
         current_apparent_temperature=current_apparent_temperature,
+        air_quality=0,
+        humidity=humidity,
+        precipitation_chance=preciptation,
+        visibility=visibility,
+        wind_speed=wind_speed,
+        wind_direction=wind_direction(wind_dir),
         forecast=list(zip(
             daily_data["temperature_2m_max"],
             daily_data["temperature_2m_min"],
-            names
+            names,
+            icons
         ))
     )
+
+def icons_for(code):
+    if code == 0:
+        return ("Sun.svg", "Sunny")
+    if code in (1, 2):
+        return ("PartlyCloudy.svg", "Partly Cloudy")
+    if code == 3:
+        return ("Cloud.svg", "Cloudy")
+    if code in (45, 48):
+        return ("Fog.svg", "Foggy")
+    if code in range(51, 68) or code in range(80, 83):
+        return ("RainCloud.svg", "Rain")
+    if code in range(71, 78) or code in (85, 86):
+        return ("Snow.svg", "Snowing")
+    if code in (95, 96, 99):
+        return ("ThunderCloud.svg",)
+    return ("Cloud.svg", "Cloudy")
+
+def wind_direction(deg):
+    direction = ["S", "SW", "W", "NW", "N", "NE", "E", "SE"]
+    return direction[round(deg / 45 % 8)]
 
 if __name__ == "__main__":
     conn = psycopg.connect(
@@ -50,11 +80,25 @@ if __name__ == "__main__":
     if now.hour > 3:
         current_temperature = hourly_data["temperature_2m"][now.hour - 3]
         current_apparent_temperature = hourly_data["apparent_temperature"][now.hour - 3]
+        visibility = hourly_data["visibility"][now.hour - 3]
+        preciptation = hourly_data["precipitation"][now.hour - 3]
+        wind_speed = hourly_data["wind_speed_10m"][now.hour - 3]
+        wind_dir = hourly_data["wind_direction_10m"][now.hour - 3]
+        humidity = hourly_data["relative_humidity_2m"][now.hour - 3]
     else:
         current_temperature = hourly_data["temperature_2m"][24 + now.hour - 3]
         current_apparent_temperature = hourly_data["apparent_temperature"][24 + now.hour - 3]
+        visibility = hourly_data["visibility"][24 + now.hour - 3]
+        preciptation = hourly_data["precipitation"][24 + now.hour - 3]
+        wind_speed = hourly_data["wind_speed_10m"][24 + now.hour - 3]
+        wind_dir = hourly_data["wind_direction_10m"][24 + now.hour - 3]
+        humidity = hourly_data["relative_humidity_2m"][24 + now.hour - 3]
 
     days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     names = [days[(date.today().weekday() + i) % 7] for i in range(0, 7)]
+
+    icons = [icons_for(code)[0] for code in daily_data["weather_code"]]
+    current_icon = icons[0]
+    current_weather = icons_for(daily_data["weather_code"][0])[1]
     
     app.run(debug=True)

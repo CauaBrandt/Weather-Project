@@ -23,7 +23,7 @@ def make_request(lat, lon, timezone):
 		"latitude": lat,
 		"longitude": lon,
 		"daily": ["weather_code", "temperature_2m_max", "temperature_2m_min"],
-		"hourly": ["temperature_2m", "precipitation", "wind_speed_10m", "wind_direction_10m", "uv_index", "apparent_temperature"],
+		"hourly": ["temperature_2m", "visibility", "precipitation", "wind_speed_10m", "wind_direction_10m", "uv_index", "apparent_temperature", "relative_humidity_2m"],
 		"timezone": timezone,
 		"forecast_days": 7
 	}
@@ -36,11 +36,13 @@ def make_request(lat, lon, timezone):
 	# Process hourly data. The order of variables needs to be the same as requested.
 	hourly = response.Hourly()
 	hourly_temperature_2m = hourly.Variables(0).ValuesAsNumpy()
-	hourly_precipitation = hourly.Variables(1).ValuesAsNumpy()
-	hourly_wind_speed_10m = hourly.Variables(2).ValuesAsNumpy()
-	hourly_wind_direction_10m = hourly.Variables(3).ValuesAsNumpy()
-	hourly_uv_index = hourly.Variables(4).ValuesAsNumpy()
-	hourly_apparent_temperature = hourly.Variables(5).ValuesAsNumpy()
+	hourly_visibility = hourly.Variables(1).ValuesAsNumpy()
+	hourly_precipitation = hourly.Variables(2).ValuesAsNumpy()
+	hourly_wind_speed_10m = hourly.Variables(3).ValuesAsNumpy()
+	hourly_wind_direction_10m = hourly.Variables(4).ValuesAsNumpy()
+	hourly_uv_index = hourly.Variables(5).ValuesAsNumpy()
+	hourly_apparent_temperature = hourly.Variables(6).ValuesAsNumpy()
+	hourly_relative_humidity_2m = hourly.Variables(7).ValuesAsNumpy()
 
 	hourly_data = {
 		"date": pd.date_range(
@@ -52,11 +54,13 @@ def make_request(lat, lon, timezone):
 	}
 
 	hourly_data["temperature_2m"] = hourly_temperature_2m
+	hourly_data["visibility"] = hourly_visibility
 	hourly_data["precipitation"] = hourly_precipitation
 	hourly_data["wind_speed_10m"] = hourly_wind_speed_10m
 	hourly_data["wind_direction_10m"] = hourly_wind_direction_10m
 	hourly_data["uv_index"] = hourly_uv_index
 	hourly_data["apparent_temperature"] = hourly_apparent_temperature
+	hourly_data["relative_humidity_2m"] = hourly_relative_humidity_2m
 
 	# Process daily data. The order of variables needs to be the same as requested.
 	daily = response.Daily()
@@ -96,10 +100,7 @@ def make_request(lat, lon, timezone):
 		result = []
 
 		for value in values.tolist():
-			if key == "temperature_2m" or key == "apparent_temperature":
-				result.append(round(value))
-			else:
-				result.append(round(value, 2))
+			result.append(round(value))
 
 		hourly_data[key] = result
 
