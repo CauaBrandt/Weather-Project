@@ -1,11 +1,10 @@
 body {
+    background-color: rgb(230 230 230);
     position: relative;
-    background-image: url("../Images/Sky.jpg");
-    background-color: rgb(23, 58, 214);
     padding: 70px 10px 4000px;
 }
 p {
-    color: white;
+    color: rgb(10, 10, 40);
     font-family: Roboto, Arial;
     font-size: 14px;
     

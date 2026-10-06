@@ -24,7 +24,6 @@ def home():
         current_weather=current_weather,
         current_temperature=current_temperature,
         current_apparent_temperature=current_apparent_temperature,
-        air_quality=0,
         humidity=humidity,
         precipitation_chance=preciptation,
         visibility=visibility,
@@ -52,7 +51,7 @@ def icons_for(code):
     if code in range(71, 78) or code in (85, 86):
         return ("Snow.svg", "Snowing")
     if code in (95, 96, 99):
-        return ("ThunderCloud.svg",)
+        return ("ThunderCloud.svg", "Thunderstorm")
     return ("Cloud.svg", "Cloudy")
 
 def wind_direction(deg):
@@ -80,7 +79,7 @@ if __name__ == "__main__":
     if now.hour > 3:
         current_temperature = hourly_data["temperature_2m"][now.hour - 3]
         current_apparent_temperature = hourly_data["apparent_temperature"][now.hour - 3]
-        visibility = hourly_data["visibility"][now.hour - 3]
+        visibility = hourly_data["visibility"][now.hour - 3] / 1000
         preciptation = hourly_data["precipitation"][now.hour - 3]
         wind_speed = hourly_data["wind_speed_10m"][now.hour - 3]
         wind_dir = hourly_data["wind_direction_10m"][now.hour - 3]
@@ -88,7 +87,7 @@ if __name__ == "__main__":
     else:
         current_temperature = hourly_data["temperature_2m"][24 + now.hour - 3]
         current_apparent_temperature = hourly_data["apparent_temperature"][24 + now.hour - 3]
-        visibility = hourly_data["visibility"][24 + now.hour - 3]
+        visibility = hourly_data["visibility"][24 + now.hour - 3] / 1000
         preciptation = hourly_data["precipitation"][24 + now.hour - 3]
         wind_speed = hourly_data["wind_speed_10m"][24 + now.hour - 3]
         wind_dir = hourly_data["wind_direction_10m"][24 + now.hour - 3]

@@ -18,6 +18,9 @@
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
             integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
             crossorigin=""/>
+
+        <!-- Get Chart lib -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     </head>
     <body>
         <header id="header">
@@ -53,15 +56,14 @@
                     </div>
                 </div>
             </div>
-            <div class="graph">
-                Graph
-                <div class="extra-info">
-                    <p class="air-quality">Air quality: {{ air_quality }}</p>
-                    <p class="humidity">Humidity: {{ humidity }}</p>
-                    <p class="preciptation-chance">Precipitation: {{ precipitation_chance }}</p>
-                    <p class="visibilty">Visibility: {{ visibility }}</p>
-                    <p class="wind-speed">Wind Speed: {{ wind_speed }} Km/h</p>
-                    <p class="wind-direction">Wind Direction: {{ wind_direction }}</p>
+            <div id="chart-container">
+                <canvas id="chart"></canvas>
+                <div id="extra-info">
+                    <p id="humidity">Humidity: {{ humidity }}&#37;</p>
+                    <p id="preciptation-chance">Precipitation: {{ precipitation_chance }} mm</p>
+                    <p id="visibilty">Visibility: {{ visibility }} Km</p>
+                    <p id="wind-speed">Wind Speed: {{ wind_speed }} Km/h</p>
+                    <p id="wind-direction">Wind Direction: {{ wind_direction }}</p>
                 </div>
             </div>
             <div id="forecast-map">
@@ -80,12 +82,28 @@
                 <div id="map"></div>                
             </div>
         </main>
-
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-                integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-                crossorigin=""></script>
-        <script src="../static/Scripts/map.js"></script>
-        <script src="../static/Scripts/daily_info.js"></script>
-        <script src="../static/Scripts/header.js"></script>
     </body>
+    <script>
+        const ctx = document.getElementById("chart");
+
+        new Chart(ctx, {
+        type: "line",   // try "bar", "pie", "doughnut"
+        data: {
+            labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun", ],
+            datasets: [{
+            label: "Sales",
+            data: [12, 19, 8, 15, 22, 15, 30],
+            borderColor: "black",
+            color: "black",
+            tension: 0.8
+            }]
+        }
+        });
+    </script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+    <script src="../static/Scripts/map.js"></script>
+    <script src="../static/Scripts/daily_info.js"></script>
+    <script src="../static/Scripts/header.js"></script>
 </html>

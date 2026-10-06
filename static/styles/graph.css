@@ -1,14 +1,19 @@
-.graph {
+#chart-container {
     position: relative;
-    background-color: gray;
+    background-color: white;
+    border-radius: 20px;
     height: 300px;
 
     margin-bottom: 50px;
 }
-.extra-info {
+#chart {
+    width: 800px;
+    padding: 5px 15px;
+}
+#extra-info {
     position: absolute;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-columns: auto auto auto auto auto auto;
     height: 20px;
     align-items: center;
 
@@ -16,7 +21,7 @@
     left: 0;
     right: 0;
 }
-.extra-info p {
+#extra-info p {
     font-size: 17px;
     font-weight: 500;
 }
