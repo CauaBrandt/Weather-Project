@@ -35,6 +35,12 @@
 }
 #temperature  {
     position: relative;
+    background: none;
+    border: none;
+    border-radius: 50px;
+}
+#temperature:hover {
+    background: fixed rgb(200 200 200);
 }
 #temperature .temperature{
     font-size: 50px;
@@ -45,20 +51,21 @@
 #temperature .degree {
     position: absolute;
     font-size: 25px;
-    top: 6px;
-    right: 15px;
+    font-weight: 700;
+    top: 7px;
+    right: 20px;
 }
 #apparent-temperature {
-    font-size: 15px;
-}
-#apparent-temperature-number {
     position: relative;
-    font-size: 30px;
-    font-weight: 500;
-    margin-left: 10px;
-}
-#apparent-temperature-degree {
-    position: absolute;
     font-size: 15px;
-    top: 4px;
+}
+.apparent-temperature-number {
+    font-size: 18px;
+    font-weight: 500;
+}
+.apparent-temperature-degree {
+    position: absolute;
+    font-size: 12px;
+    font-weight: 500;
+    top: 2px;
 }

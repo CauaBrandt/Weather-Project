@@ -5,10 +5,14 @@ body {
 }
 p {
     color: rgb(10, 10, 40);
-    font-family: Roboto, Arial;
     font-size: 14px;
     
     margin: 0;
+}
+p,
+button,
+span {
+    font-family: Roboto, Arial;
 }
 #current-weather-container {
     display: grid;

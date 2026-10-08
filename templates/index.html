@@ -51,18 +51,22 @@
                 <div id="daily-weather-info">
                     <p id="weather-code">{{ current_weather }}</p>
                     <div id="temperature-container">
-                        <p id="temperature"><span class="temperature">{{ current_temperature }}</span> <span class="degree">&#176;C</span></p>
+                        <button id="temperature"><span class="temperature">{{ current_temperature }}</span> <span class="degree">&#176;C</span></button>
                         <p id="apparent-temperature">Feels like <span class="temperature apparent-temperature-number">{{ current_apparent_temperature }}</span><span class="degree apparent-temperature-degree">&#176;C</span> </p>
                     </div>
                 </div>
             </div>
             <div id="chart-container">
-                <canvas id="chart"></canvas>
+                <div id="chart-scroller">
+                    <div id="chart-inner">
+                        <canvas id="chart"></canvas>
+                    </div>
+                </div>
                 <div id="extra-info">
-                    <p id="humidity">Humidity: {{ humidity }}&#37;</p>
+                    <button id="humidity">Humidity: {{ humidity }}&#37;</button>
                     <p id="preciptation-chance">Precipitation: {{ precipitation_chance }} mm</p>
-                    <p id="visibilty">Visibility: {{ visibility }} Km</p>
-                    <p id="wind-speed">Wind Speed: {{ wind_speed }} Km/h</p>
+                    <button id="visibility">Visibility: {{ visibility }} Km</button>
+                    <button id="wind-speed">Wind Speed: {{ wind_speed }} Km/h</button>
                     <p id="wind-direction">Wind Direction: {{ wind_direction }}</p>
                 </div>
             </div>
@@ -84,21 +88,93 @@
         </main>
     </body>
     <script>
-        const ctx = document.getElementById("chart");
+        const temperatureButton = document.getElementById("temperature");
+        const HumdityButton = document.getElementById("humidity");
+        const visibilityButton = document.getElementById("visibility");
+        const windSpeedButton = document.getElementById("wind-speed");
+        const scroller = document.getElementById("chart-scroller");
+        const chartInner = document.getElementById("chart-inner");
+        const chart = document.getElementById("chart");
+        const data = {{ data | tojson }};
 
-        new Chart(ctx, {
-        type: "line",   // try "bar", "pie", "doughnut"
-        data: {
-            labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun", ],
-            datasets: [{
-            label: "Sales",
-            data: [12, 19, 8, 15, 22, 15, 30],
-            borderColor: "black",
-            color: "black",
-            tension: 0.8
-            }]
+        chartInner.style.width = Math.max(data.labels.length * 25, 800) + "px";
+        
+        const options = {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { ticks: { autoSkip: false } },
+                y: { beginAtZero: true }
+            }
         }
-        });
+
+        temperatureButton.addEventListener("click", () => {
+            new Chart(chart, {
+            type: "line",
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: "Temperature (°C)",
+                    data: data.temperature,
+                    borderColor: "red",
+                    tension: 0.5
+                }]
+            },
+            options: options
+            });
+        })
+        HumdityButton.addEventListener("click", () => {
+            new Chart(chart, {
+            type: "line",
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: "Humidity (%)",
+                    data: data.humidity,
+                    borderColor: "darkblue",
+                    tension: 0.5
+                }]
+            },
+            options: options
+            });
+        })
+        visibilityButton.addEventListener("click", () => {
+            new Chart(chart, {
+            type: "line",
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: "Visibility (Km)",
+                    data: data.visibility,
+                    borderColor: "yellow",
+                    tension: 0.5
+                }]
+            },
+            options: options
+            });
+        })
+        windSpeedButton.addEventListener("click", () => {
+            new Chart(chart, {
+            type: "line",
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: "Wind Speed (Km)",
+                    data: data.wind_speed,
+                    borderColor: "gray",
+                    tension: 0.5
+                }]
+            },
+            options: options
+            });
+        })
+        
+        scroller.addEventListener("wheel", (e) => {
+            if (scroller.width <= scroller.clientWidth) return;
+
+            e.preventDefault();
+            scroller.scrollLeft += e.deltaY;
+        }, { passive: false });
     </script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="

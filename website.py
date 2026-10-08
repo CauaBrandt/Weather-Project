@@ -1,6 +1,6 @@
 import psycopg
 import pytz
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, jsonify
 from datetime import datetime as dt, date
 from insert_to_database import make_request
 
@@ -29,6 +29,7 @@ def home():
         visibility=visibility,
         wind_speed=wind_speed,
         wind_direction=wind_direction(wind_dir),
+        data=chart(hourly_data),
         forecast=list(zip(
             daily_data["temperature_2m_max"],
             daily_data["temperature_2m_min"],
@@ -57,6 +58,24 @@ def icons_for(code):
 def wind_direction(deg):
     direction = ["S", "SW", "W", "NW", "N", "NE", "E", "SE"]
     return direction[round(deg / 45 % 8)]
+
+def chart(data):
+    labels = []
+    i = 3
+    for _ in range(7 * 24):
+        labels.append(i)
+        i += 1
+        if i > 23:
+            i = 0
+
+    chart = {
+        "labels": labels,
+        "temperature": data["temperature_2m"],
+        "humidity": data["relative_humidity_2m"],
+        "visibility": [n / 1000 for n in data["visibility"]],
+        "wind_speed": data["wind_speed_10m"]
+    }
+    return chart
 
 if __name__ == "__main__":
     conn = psycopg.connect(
