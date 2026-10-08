@@ -102,71 +102,25 @@
         const options = {
             responsive: true,
             maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
             scales: {
                 x: { ticks: { autoSkip: false } },
                 y: { beginAtZero: true }
             }
         }
+        drawChart(data["temperature"], "Temperature (°C)", "red", options)
 
         temperatureButton.addEventListener("click", () => {
-            new Chart(chart, {
-            type: "line",
-            data: {
-                labels: data.labels,
-                datasets: [{
-                    label: "Temperature (°C)",
-                    data: data.temperature,
-                    borderColor: "red",
-                    tension: 0.5
-                }]
-            },
-            options: options
-            });
+            drawChart(data["temperature"], "Temperature (°C)", "red", options)
         })
         HumdityButton.addEventListener("click", () => {
-            new Chart(chart, {
-            type: "line",
-            data: {
-                labels: data.labels,
-                datasets: [{
-                    label: "Humidity (%)",
-                    data: data.humidity,
-                    borderColor: "darkblue",
-                    tension: 0.5
-                }]
-            },
-            options: options
-            });
+            drawChart(data["humidity"], "Humidity (%)", "darkblue", options)
         })
         visibilityButton.addEventListener("click", () => {
-            new Chart(chart, {
-            type: "line",
-            data: {
-                labels: data.labels,
-                datasets: [{
-                    label: "Visibility (Km)",
-                    data: data.visibility,
-                    borderColor: "yellow",
-                    tension: 0.5
-                }]
-            },
-            options: options
-            });
+            drawChart(data["visibility"], "Visibility (Km)", "yellow", options)
         })
         windSpeedButton.addEventListener("click", () => {
-            new Chart(chart, {
-            type: "line",
-            data: {
-                labels: data.labels,
-                datasets: [{
-                    label: "Wind Speed (Km)",
-                    data: data.wind_speed,
-                    borderColor: "gray",
-                    tension: 0.5
-                }]
-            },
-            options: options
-            });
+            drawChart(data["wind_speed"], "Wind Speed (Km)", "gray", options)
         })
         
         scroller.addEventListener("wheel", (e) => {
@@ -175,6 +129,25 @@
             e.preventDefault();
             scroller.scrollLeft += e.deltaY;
         }, { passive: false });
+
+        function drawChart(info, label, color, options) {
+            const currentChart = Chart.getChart("chart");
+            if (currentChart) currentChart.destroy();
+
+            new Chart(chart, {
+            type: "line",
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: label,
+                    data: info,
+                    borderColor: color,
+                    tension: 0.5
+                }]
+            },
+            options: options
+            });
+        }
     </script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
