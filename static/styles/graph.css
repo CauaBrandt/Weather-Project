@@ -17,6 +17,7 @@
     height: 300px;
     box-sizing: border-box;
     min-width: 100%;
+    padding: 2px 5px;
 }
 #extra-info {
     position: absolute;

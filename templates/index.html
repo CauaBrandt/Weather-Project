@@ -52,7 +52,8 @@
                     <p id="weather-code">{{ current_weather }}</p>
                     <div id="temperature-container">
                         <button id="temperature"><span class="temperature">{{ current_temperature }}</span> <span class="degree">&#176;C</span></button>
-                        <p id="apparent-temperature">Feels like <span class="temperature apparent-temperature-number">{{ current_apparent_temperature }}</span><span class="degree apparent-temperature-degree">&#176;C</span> </p>
+                        <p id="apparent-temperature">Feels like</p>
+                        <button id="apparent-temperature-button"><span class="temperature apparent-temperature-number">{{ current_apparent_temperature }}</span><span class="degree apparent-temperature-degree">&#176;C</span></button>
                     </div>
                 </div>
             </div>
@@ -89,6 +90,7 @@
     </body>
     <script>
         const temperatureButton = document.getElementById("temperature");
+        const apparentTemperatureButton = document.getElementById("apparent-temperature-button");
         const HumdityButton = document.getElementById("humidity");
         const visibilityButton = document.getElementById("visibility");
         const windSpeedButton = document.getElementById("wind-speed");
@@ -107,21 +109,24 @@
                 x: { ticks: { autoSkip: false } },
                 y: { beginAtZero: true }
             }
-        }
-        drawChart(data["temperature"], "Temperature (°C)", "red", options)
+        };
+        drawChart(data["temperature"], "Temperature (°C)", "red", options);
 
         temperatureButton.addEventListener("click", () => {
-            drawChart(data["temperature"], "Temperature (°C)", "red", options)
-        })
+            drawChart(data["temperature"], "Temperature (°C)", "red", options);
+        });
+        apparentTemperatureButton.addEventListener("click", () => {
+            drawChart(data["apparent_temperature"], "Apparent Temperature (°C)", "lightred", options);
+        });
         HumdityButton.addEventListener("click", () => {
-            drawChart(data["humidity"], "Humidity (%)", "darkblue", options)
-        })
+            drawChart(data["humidity"], "Humidity (%)", "darkblue", options);
+        });
         visibilityButton.addEventListener("click", () => {
-            drawChart(data["visibility"], "Visibility (Km)", "yellow", options)
-        })
+            drawChart(data["visibility"], "Visibility (Km)", "yellow", options);
+        });
         windSpeedButton.addEventListener("click", () => {
-            drawChart(data["wind_speed"], "Wind Speed (Km)", "gray", options)
-        })
+            drawChart(data["wind_speed"], "Wind Speed (Km)", "gray", options);
+        });
         
         scroller.addEventListener("wheel", (e) => {
             if (scroller.width <= scroller.clientWidth) return;
@@ -132,7 +137,10 @@
 
         function drawChart(info, label, color, options) {
             const currentChart = Chart.getChart("chart");
-            if (currentChart) currentChart.destroy();
+            if (currentChart) {
+                if (currentChart.data.datasets[0].label === label) return;
+                currentChart.destroy();
+            }
 
             new Chart(chart, {
             type: "line",

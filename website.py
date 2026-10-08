@@ -71,6 +71,7 @@ def chart(data):
     chart = {
         "labels": labels,
         "temperature": data["temperature_2m"],
+        "apparent_temperature": data["apparent_temperature"],
         "humidity": data["relative_humidity_2m"],
         "visibility": [n / 1000 for n in data["visibility"]],
         "wind_speed": data["wind_speed_10m"]
