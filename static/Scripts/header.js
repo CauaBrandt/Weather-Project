@@ -14,6 +14,19 @@ celsiusButton.addEventListener("click", () => {
     for (let i = 0; i < degree.length; i++) {
         degree[i].textContent = symbol;
     }
+    
+    const chart = Chart.getChart("chart");
+    const chartLabel = chart.data.datasets[0].label;
+    const data = JSON.parse(document.getElementById("chart-data").textContent);
+    const dataTemperature = data.temperature;
+
+    if ( chartLabel.includes("Temperature", "Apparent Temperature") ) {
+        chart.data.datasets[0].data = isCelsius ?
+            dataTemperature:
+            dataTemperature.map(f => invertDegree(f, true));
+        chart.data.datasets[0].label = chartLabel.includes("Apparent") ? `Apparent Temperature (${symbol})`: `Temperature (${symbol})`;
+        chart.update();
+    }
 });
 
 function invertDegree(temperature, isCelsius) {

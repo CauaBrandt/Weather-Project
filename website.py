@@ -63,7 +63,7 @@ def chart(data):
     labels = []
     i = 3
     for _ in range(7 * 24):
-        labels.append(i)
+        labels.append(f"{i}h")
         i += 1
         if i > 23:
             i = 0

@@ -88,79 +88,12 @@
             </div>
         </main>
     </body>
-    <script>
-        const temperatureButton = document.getElementById("temperature");
-        const apparentTemperatureButton = document.getElementById("apparent-temperature-button");
-        const HumdityButton = document.getElementById("humidity");
-        const visibilityButton = document.getElementById("visibility");
-        const windSpeedButton = document.getElementById("wind-speed");
-        const scroller = document.getElementById("chart-scroller");
-        const chartInner = document.getElementById("chart-inner");
-        const chart = document.getElementById("chart");
-        const data = {{ data | tojson }};
-
-        chartInner.style.width = Math.max(data.labels.length * 25, 800) + "px";
-        
-        const options = {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                x: { ticks: { autoSkip: false } },
-                y: { beginAtZero: true }
-            }
-        };
-        drawChart(data["temperature"], "Temperature (°C)", "red", options);
-
-        temperatureButton.addEventListener("click", () => {
-            drawChart(data["temperature"], "Temperature (°C)", "red", options);
-        });
-        apparentTemperatureButton.addEventListener("click", () => {
-            drawChart(data["apparent_temperature"], "Apparent Temperature (°C)", "lightred", options);
-        });
-        HumdityButton.addEventListener("click", () => {
-            drawChart(data["humidity"], "Humidity (%)", "darkblue", options);
-        });
-        visibilityButton.addEventListener("click", () => {
-            drawChart(data["visibility"], "Visibility (Km)", "yellow", options);
-        });
-        windSpeedButton.addEventListener("click", () => {
-            drawChart(data["wind_speed"], "Wind Speed (Km)", "gray", options);
-        });
-        
-        scroller.addEventListener("wheel", (e) => {
-            if (scroller.width <= scroller.clientWidth) return;
-
-            e.preventDefault();
-            scroller.scrollLeft += e.deltaY;
-        }, { passive: false });
-
-        function drawChart(info, label, color, options) {
-            const currentChart = Chart.getChart("chart");
-            if (currentChart) {
-                if (currentChart.data.datasets[0].label === label) return;
-                currentChart.destroy();
-            }
-
-            new Chart(chart, {
-            type: "line",
-            data: {
-                labels: data.labels,
-                datasets: [{
-                    label: label,
-                    data: info,
-                    borderColor: color,
-                    tension: 0.5
-                }]
-            },
-            options: options
-            });
-        }
-    </script>
+    <script type="application/json" id="chart-data">{{ data | tojson }}</script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
             crossorigin=""></script>
-    <script src="../static/Scripts/map.js"></script>
-    <script src="../static/Scripts/daily_info.js"></script>
     <script src="../static/Scripts/header.js"></script>
+    <script src="../static/Scripts/daily_info.js"></script>
+    <script src="../static/Scripts/graph.js"></script>
+    <script src="../static/Scripts/map.js"></script>
 </html>
