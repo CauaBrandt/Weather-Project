@@ -10,21 +10,26 @@ celsiusButton.addEventListener("click", () => {
     const symbol = isCelsius ? "°C": "°F";
     for (let i = 0; i < temperature.length; i++) {
         temperature[i].textContent = `${invertDegree(Number(temperature[i].textContent), !isCelsius)}`;
-    }
-    for (let i = 0; i < degree.length; i++) {
         degree[i].textContent = symbol;
     }
     
     const chart = Chart.getChart("chart");
     const chartLabel = chart.data.datasets[0].label;
     const data = JSON.parse(document.getElementById("chart-data").textContent);
-    const dataTemperature = data.temperature;
 
     if ( chartLabel.includes("Temperature", "Apparent Temperature") ) {
-        chart.data.datasets[0].data = isCelsius ?
-            dataTemperature:
-            dataTemperature.map(f => invertDegree(f, true));
-        chart.data.datasets[0].label = chartLabel.includes("Apparent") ? `Apparent Temperature (${symbol})`: `Temperature (${symbol})`;
+        if (chartLabel.includes("Apparent")) {    
+            chart.data.datasets[0].data = isCelsius ?
+                data.apparent_temperature:
+                data.apparent_temperature.map(f => invertDegree(f, true));
+            chart.data.datasets[0].label =`Apparent Temperature (${symbol})`;
+        }
+        else {
+            chart.data.datasets[0].data = isCelsius ?
+                data.temperature:
+                data.temperature.map(f => invertDegree(f, true));
+            chart.data.datasets[0].label = `Temperature (${symbol})`;
+        }
         chart.update();
     }
 });
