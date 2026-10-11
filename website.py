@@ -1,42 +1,85 @@
 import psycopg
 import pytz
-from flask import Flask, render_template, redirect, url_for, jsonify
+from flask import Flask, render_template, redirect, url_for, jsonify, request
 from datetime import datetime as dt, date
 from insert_to_database import make_request
-
-class City():
-    def __init__(self, name, latitude, longitude, state, timezone):
-        self.name = name
-        self.latitude = latitude
-        self.longitude = longitude
-        self.state = state
-        self.timezone = timezone
 
 app = Flask("__name__")
 
 @app.route("/")
 def home():
+    return redirect("Marica")
+
+@app.route("/search_city")
+def search_city():
+    query = request.args.get("q", "").strip()
+
+    cur.execute("SELECT cities.name, states.name, latitude, longitude FROM cities INNER JOIN states USING(state_id) WHERE cities.name LIKE %s LIMIT 6", (f"%{query}%",))
+
+    return jsonify({ "cities": cur.fetchall() })
+
+@app.route("/<city>")
+def city(city):
+    cur.execute("SELECT cities.name, latitude, longitude, states.name, timezone FROM cities INNER JOIN states USING(state_id) WHERE cities.name = %s", (city,))
+    city_info = cur.fetchone()
+
+    city = {
+        "name": city_info[0],
+        "latitude": city_info[1],
+        "longitude": city_info[2], 
+        "state": city_info[3], 
+        "timezone": city_info[4]
+    }
+    
+    hourly_data, daily_data = make_request(city["latitude"], city["longitude"], city["timezone"])
+    
+    now = dt.now(pytz.timezone(city["timezone"]))
+
+    if now.hour > 3:
+        current_temperature = hourly_data["temperature_2m"][now.hour - 3]
+        current_apparent_temperature = hourly_data["apparent_temperature"][now.hour - 3]
+        visibility = hourly_data["visibility"][now.hour - 3] / 1000
+        preciptation = hourly_data["precipitation"][now.hour - 3]
+        wind_speed = hourly_data["wind_speed_10m"][now.hour - 3]
+        wind_dir = hourly_data["wind_direction_10m"][now.hour - 3]
+        humidity = hourly_data["relative_humidity_2m"][now.hour - 3]
+    else:
+        current_temperature = hourly_data["temperature_2m"][24 + now.hour - 3]
+        current_apparent_temperature = hourly_data["apparent_temperature"][24 + now.hour - 3]
+        visibility = hourly_data["visibility"][24 + now.hour - 3] / 1000
+        preciptation = hourly_data["precipitation"][24 + now.hour - 3]
+        wind_speed = hourly_data["wind_speed_10m"][24 + now.hour - 3]
+        wind_dir = hourly_data["wind_direction_10m"][24 + now.hour - 3]
+        humidity = hourly_data["relative_humidity_2m"][24 + now.hour - 3]
+
+    days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    names = [days[(date.today().weekday() + i) % 7] for i in range(0, 7)]
+
+    icons = [icons_for(code)[0] for code in daily_data["weather_code"]]
+    current_icon = icons[0]
+    current_weather = icons_for(daily_data["weather_code"][0])[1]
+    
+    
     return render_template(
-        "index.html",
-        city=city.name,
-        state=city.state,
-        current_icon=current_icon,
-        current_weather=current_weather,
-        current_temperature=current_temperature,
-        current_apparent_temperature=current_apparent_temperature,
-        humidity=humidity,
-        precipitation_chance=preciptation,
-        visibility=visibility,
-        wind_speed=wind_speed,
-        wind_direction=wind_direction(wind_dir),
-        data=chart(hourly_data),
-        forecast=list(zip(
-            daily_data["temperature_2m_max"],
-            daily_data["temperature_2m_min"],
-            names,
-            icons
-        ))
-    )
+            "index.html",
+            city=city,
+            current_icon=current_icon,
+            current_weather=current_weather,
+            current_temperature=current_temperature,
+            current_apparent_temperature=current_apparent_temperature,
+            humidity=humidity,
+            precipitation_chance=preciptation,
+            visibility=visibility,
+            wind_speed=wind_speed,
+            wind_direction=wind_direction(wind_dir),
+            data=chart(hourly_data),
+            forecast=list(zip(
+                daily_data["temperature_2m_max"],
+                daily_data["temperature_2m_min"],
+                names,
+                icons
+            ))
+        )
 
 def icons_for(code):
     if code == 0:
@@ -86,38 +129,5 @@ if __name__ == "__main__":
         port="5432"
     )
     cur = conn.cursor()
-    
-    cur.execute("SELECT cities.name, latitude, longitude, states.name, timezone FROM cities INNER JOIN states USING(state_id) WHERE cities.name = 'Marica'")
-    city_info = cur.fetchone()
-
-    city = City(city_info[0], city_info[1], city_info[2], city_info[3], city_info[4])
-    
-    hourly_data, daily_data = make_request(city.latitude, city.longitude, city.timezone)
-
-    now = dt.now(pytz.timezone(city.timezone))
-
-    if now.hour > 3:
-        current_temperature = hourly_data["temperature_2m"][now.hour - 3]
-        current_apparent_temperature = hourly_data["apparent_temperature"][now.hour - 3]
-        visibility = hourly_data["visibility"][now.hour - 3] / 1000
-        preciptation = hourly_data["precipitation"][now.hour - 3]
-        wind_speed = hourly_data["wind_speed_10m"][now.hour - 3]
-        wind_dir = hourly_data["wind_direction_10m"][now.hour - 3]
-        humidity = hourly_data["relative_humidity_2m"][now.hour - 3]
-    else:
-        current_temperature = hourly_data["temperature_2m"][24 + now.hour - 3]
-        current_apparent_temperature = hourly_data["apparent_temperature"][24 + now.hour - 3]
-        visibility = hourly_data["visibility"][24 + now.hour - 3] / 1000
-        preciptation = hourly_data["precipitation"][24 + now.hour - 3]
-        wind_speed = hourly_data["wind_speed_10m"][24 + now.hour - 3]
-        wind_dir = hourly_data["wind_direction_10m"][24 + now.hour - 3]
-        humidity = hourly_data["relative_humidity_2m"][24 + now.hour - 3]
-
-    days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-    names = [days[(date.today().weekday() + i) % 7] for i in range(0, 7)]
-
-    icons = [icons_for(code)[0] for code in daily_data["weather_code"]]
-    current_icon = icons[0]
-    current_weather = icons_for(daily_data["weather_code"][0])[1]
     
     app.run(debug=True)

@@ -9,6 +9,8 @@ p {
     
     margin: 0;
 }
+div,
+form,
 p,
 button,
 span {
@@ -26,6 +28,10 @@ span {
     font-size: 30px;
     font-weight: 700;
 }
+#current-weather-text {
+    margin-right: 20px;
+}
 #date {
     justify-self: end;
+    margin-left: 20px;
 }

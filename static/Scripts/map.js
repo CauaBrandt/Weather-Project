@@ -1,4 +1,5 @@
-let map = L.map('map').setView([-22.9354, -42.8246], 13)
+const cityData = JSON.parse(document.getElementById("city-data").textContent);
+const map = L.map('map').setView([cityData.latitude, cityData.longitude], 13);
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,

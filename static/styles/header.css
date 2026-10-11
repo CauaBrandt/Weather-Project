@@ -19,6 +19,7 @@
 }
 #search-bar-container {
     flex: 1;
+    position: relative;
     display: flex;
     max-width: 700px;
 }
@@ -44,6 +45,31 @@
 }
 #search-button img {
     width: 24px;
+}
+#city-list  {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    border-radius: 20px;
+    min-width: 400px;
+    text-align: center;
+    list-style: none;
+    padding: 0;
+
+    top: 100%;
+    left: 0;
+    right: 0;
+}
+#city-list li {
+    border-radius: 20px;
+    text-align: center;
+    width: 100%;
+    height: 100px;
+}
+#city-list li:hover {
+    background-color: rgb(240, 240, 240);
+    cursor: pointer;
 }
 
 #right {

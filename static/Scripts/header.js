@@ -1,8 +1,45 @@
+const searchForm = document.getElementById("search-bar-container");
+const searchBar = document.getElementById("search-bar");
+const cityList = document.getElementById("city-list");
 const celsiusButton = document.getElementById("degree-change");
 const temperature = document.getElementsByClassName("temperature");
 const degree = document.getElementsByClassName("degree");
 
 let isCelsius = true
+let timer;
+
+searchForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const query = searchBar.value.trim();
+    if (!query) return;
+    
+    // window.location.href = `/${data.cities[0][0]}`;
+});
+
+searchBar.addEventListener("input", () => {
+    clearTimeout(timer);
+    const query = searchBar.value.trim();
+    
+    cityList.innerHTML = ""
+    timer = setTimeout(async () => {
+        const response = await fetch("/search_city?q=" + encodeURIComponent(query));
+        const data = await response.json();
+
+        if (!data.cities.length) {
+            console.log("City not found!");
+            return
+        }
+        data.cities.forEach(city => {
+            const cityButton = document.createElement("li");
+            cityButton.textContent = `${city[0]}, ${city[1]}`
+            cityButton.addEventListener("click", () => {
+                window.location.href = `${encodeURIComponent(city[0])}`
+            });
+            cityList.appendChild(cityButton);
+        });
+        cityList.style.height = cityList.children.length * 100 + "px";
+    }, 250);
+});
 
 celsiusButton.addEventListener("click", () => {
     isCelsius = !isCelsius;

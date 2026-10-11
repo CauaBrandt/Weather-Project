@@ -26,12 +26,13 @@
         <header id="header">
             <div id="left"></div>
             <div id="middle">
-                <div id="search-bar-container">
+                <form id="search-bar-container">
                     <input id="search-bar" type="text" placeholder="Search">
                     <button id="search-button">
                         <img src="../static/Icons/Search.svg">
                     </button>
-                </div>
+                    <ul id="city-list"></ul>
+                </form>
             </div>
             <div id="right">
                 <button id="degree-change">
@@ -43,7 +44,7 @@
         <main id="info">
             <div id="current-weather-container">
                 <p id="current-weather-text">Current weather</p>
-                <p id="city">{{ city }}, {{ state }}</p>
+                <p id="city">{{ city.name }}, {{ city.state }}</p>
                 <p id="date"></p>
             </div>
             <div id="daily-info">
@@ -89,6 +90,7 @@
         </main>
     </body>
     <script type="application/json" id="chart-data">{{ data | tojson }}</script>
+    <script type="application/json" id="city-data">{{ city | tojson }}</script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
             crossorigin=""></script>
