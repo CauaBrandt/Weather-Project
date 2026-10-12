@@ -22,7 +22,7 @@
 #extra-info {
     position: absolute;
     display: grid;
-    grid-template-columns: auto auto auto auto auto auto;
+    grid-template-columns: auto auto auto auto auto;
     height: 20px;
     align-items: center;
 
@@ -49,4 +49,7 @@
 #extra-info button:hover {
     cursor: pointer;
     background-color: rgb(200 200 200);
+}
+#wind-direction {
+    color: rgb(90 90 90);
 }

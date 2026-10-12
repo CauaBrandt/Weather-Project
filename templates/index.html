@@ -28,9 +28,6 @@
             <div id="middle">
                 <form id="search-bar-container">
                     <input id="search-bar" type="text" placeholder="Search">
-                    <button id="search-button">
-                        <img src="../static/Icons/Search.svg">
-                    </button>
                     <ul id="city-list"></ul>
                 </form>
             </div>
@@ -68,8 +65,7 @@
                     <button id="humidity">Humidity: {{ humidity }}&#37;</button>
                     <p id="preciptation-chance">Precipitation: {{ precipitation_chance }} mm</p>
                     <button id="visibility">Visibility: {{ visibility }} Km</button>
-                    <button id="wind-speed">Wind Speed: {{ wind_speed }} Km/h</button>
-                    <p id="wind-direction">Wind Direction: {{ wind_direction }}</p>
+                    <button id="wind-speed">Wind Speed: {{ wind_speed }} Km/h <span id="wind-direction">{{ wind_direction }}</span></button>
                 </div>
             </div>
             <div id="forecast-map">

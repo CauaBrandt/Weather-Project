@@ -8,17 +8,13 @@ const degree = document.getElementsByClassName("degree");
 let isCelsius = true
 let timer;
 
-searchForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const query = searchBar.value.trim();
-    if (!query) return;
-    
-    // window.location.href = `/${data.cities[0][0]}`;
-});
-
 searchBar.addEventListener("input", () => {
     clearTimeout(timer);
     const query = searchBar.value.trim();
+    if (query.length === 0) {
+        cityList.innerHTML = "";
+        return;
+    }
     
     cityList.innerHTML = ""
     timer = setTimeout(async () => {
@@ -37,8 +33,17 @@ searchBar.addEventListener("input", () => {
             });
             cityList.appendChild(cityButton);
         });
-        cityList.style.height = cityList.children.length * 100 + "px";
     }, 250);
+
+    document.addEventListener("click", (e) => {
+        if (!e.target.closest("#search-bar-container")) {
+            cityList.innerHTML = "";
+            searchBar.value = "";
+        }
+    });
+});
+cityList.addEventListener("input", () => {
+    cityList.style.height = cityList.children.length * 75 + "px";
 });
 
 celsiusButton.addEventListener("click", () => {

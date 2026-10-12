@@ -12,11 +12,19 @@ def home():
 
 @app.route("/search_city")
 def search_city():
-    query = request.args.get("q", "").strip()
+    max_search = 8
+    query = request.args.get("q", "").strip().lower()
 
-    cur.execute("SELECT cities.name, states.name, latitude, longitude FROM cities INNER JOIN states USING(state_id) WHERE cities.name LIKE %s LIMIT 6", (f"%{query}%",))
+    cur.execute("SELECT cities.name, states.name, latitude, longitude FROM cities INNER JOIN states USING(state_id) WHERE LOWER(cities.name) LIKE %s LIMIT %s", (f"{query}%", max_search,))
+    result = cur.fetchall()
 
-    return jsonify({ "cities": cur.fetchall() })
+    if len(result) < max_search:
+        complement = max_search - len(result)
+        cur.execute("SELECT cities.name, states.name, latitude, longitude FROM cities INNER JOIN states USING(state_id) WHERE LOWER(cities.name) LIKE %s LIMIT %s", (f"%{query}%", complement,))
+        for city in cur.fetchall():
+            result.append(city)
+
+    return jsonify({ "cities": result })
 
 @app.route("/<city>")
 def city(city):
