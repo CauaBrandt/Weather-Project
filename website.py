@@ -8,21 +8,43 @@ app = Flask("__name__")
 
 @app.route("/")
 def home():
-    return redirect("Marica")
+    return render_template("temp.html")
 
 @app.route("/search_city")
 def search_city():
     max_search = 8
     query = request.args.get("q", "").strip().lower()
+    lat = request.args.get("lat", type=float)
+    lon = request.args.get("lon", type=float)
 
-    cur.execute("SELECT cities.name, states.name, latitude, longitude FROM cities INNER JOIN states USING(state_id) WHERE LOWER(cities.name) LIKE %s LIMIT %s", (f"{query}%", max_search,))
-    result = cur.fetchall()
+    if query:
+        cur.execute("SELECT cities.name, states.name, latitude, longitude FROM cities INNER JOIN states USING(state_id) WHERE LOWER(cities.name) LIKE %s LIMIT %s", (f"{query}%", max_search,))
+        result = cur.fetchall()
 
-    if len(result) < max_search:
-        complement = max_search - len(result)
-        cur.execute("SELECT cities.name, states.name, latitude, longitude FROM cities INNER JOIN states USING(state_id) WHERE LOWER(cities.name) LIKE %s LIMIT %s", (f"%{query}%", complement,))
-        for city in cur.fetchall():
-            result.append(city)
+        if len(result) < max_search:
+            complement = max_search - len(result)
+            cur.execute("SELECT cities.name, states.name, latitude, longitude FROM cities INNER JOIN states USING(state_id) WHERE LOWER(cities.name) LIKE %s LIMIT %s", (f"%{query}%", complement,))
+            for city in cur.fetchall():
+                if not city in result:
+                    result.append(city)
+    elif lat:
+        cur.execute("SELECT name FROM cities WHERE latitude = %s AND longitude = %s", (lat, lon,))
+        result = cur.fetchone()
+        if not result:
+            cur.execute("""
+                        SELECT name, latitude, longitude,
+                            6371 * 2 * ASIN(SQRT(
+                                POWER(SIN(RADIANS(latitude - %s) / 2), 2) +
+                                COS(RADIANS(%s)) * COS(RADIANS(latitude)) *
+                                POWER(SIN(RADIANS(longitude - %s) / 2), 2)
+                            )) AS distance_km
+                        FROM cities
+                        ORDER BY distance_km
+                        LIMIT 1
+                """, (lat, lat, lon)
+            )
+
+            result = cur.fetchone()
 
     return jsonify({ "cities": result })
 
@@ -35,7 +57,7 @@ def city(city):
         "name": city_info[0],
         "latitude": city_info[1],
         "longitude": city_info[2], 
-        "state": city_info[3], 
+        "state": city_info[3],
         "timezone": city_info[4]
     }
     
