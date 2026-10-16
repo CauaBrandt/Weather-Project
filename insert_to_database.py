@@ -20,7 +20,7 @@ def make_request(lat, lon, timezone):
 		"latitude": lat,
 		"longitude": lon,
 		"daily": ["weather_code", "temperature_2m_max", "temperature_2m_min"],
-		"hourly": ["temperature_2m", "visibility", "precipitation", "wind_speed_10m", "wind_direction_10m", "uv_index", "apparent_temperature", "relative_humidity_2m"],
+		"hourly": ["weather_code", "temperature_2m", "visibility", "precipitation", "wind_speed_10m", "wind_direction_10m", "uv_index", "apparent_temperature", "relative_humidity_2m"],
 		"timezone": timezone,
 		"forecast_days": 7
 	}
@@ -32,14 +32,15 @@ def make_request(lat, lon, timezone):
 
 	# Process hourly data. The order of variables needs to be the same as requested.
 	hourly = response.Hourly()
-	hourly_temperature_2m = hourly.Variables(0).ValuesAsNumpy()
-	hourly_visibility = hourly.Variables(1).ValuesAsNumpy()
-	hourly_precipitation = hourly.Variables(2).ValuesAsNumpy()
-	hourly_wind_speed_10m = hourly.Variables(3).ValuesAsNumpy()
-	hourly_wind_direction_10m = hourly.Variables(4).ValuesAsNumpy()
-	hourly_uv_index = hourly.Variables(5).ValuesAsNumpy()
-	hourly_apparent_temperature = hourly.Variables(6).ValuesAsNumpy()
-	hourly_relative_humidity_2m = hourly.Variables(7).ValuesAsNumpy()
+	hourly_weather_code = hourly.Variables(0).ValuesAsNumpy()
+	hourly_temperature_2m = hourly.Variables(1).ValuesAsNumpy()
+	hourly_visibility = hourly.Variables(2).ValuesAsNumpy()
+	hourly_precipitation = hourly.Variables(3).ValuesAsNumpy()
+	hourly_wind_speed_10m = hourly.Variables(4).ValuesAsNumpy()
+	hourly_wind_direction_10m = hourly.Variables(5).ValuesAsNumpy()
+	hourly_uv_index = hourly.Variables(6).ValuesAsNumpy()
+	hourly_apparent_temperature = hourly.Variables(7).ValuesAsNumpy()
+	hourly_relative_humidity_2m = hourly.Variables(8).ValuesAsNumpy()
 
 	hourly_data = {
 		"date": pd.date_range(
@@ -50,6 +51,7 @@ def make_request(lat, lon, timezone):
 		)
 	}
 
+	hourly_data["weather_code"] = hourly_weather_code
 	hourly_data["temperature_2m"] = hourly_temperature_2m
 	hourly_data["visibility"] = hourly_visibility
 	hourly_data["precipitation"] = hourly_precipitation
@@ -111,16 +113,16 @@ def make_request(lat, lon, timezone):
 		port="5432"
 	)
 	cur = conn.cursor()
-	city_id = cur.execute("SELECT city_id FROM cities WHERE latitude = %s AND longitude = %s", (lat, lon,)).fetchone()[0]
-	cur.execute("INSERT INTO daily(city_id, daily_data) VALUES(%s, %s)", (
-		city_id,
-		Jsonb({**daily_data, "date": None})
-	))
-	daily_id = cur.execute("SELECT daily_id FROM daily WHERE city_id = %s", (city_id,)).fetchone()[0]
-	cur.execute("INSERT INTO hourly(daily_id, hourly_data) VALUES(%s, %s)", (
-		daily_id,
-		Jsonb({**hourly_data, "date": None})
-	))
+
+	cur.execute(
+		"""INSERT INTO api_cache(cache_key, daily_data, hourly_data, expires_at) 
+			VALUES(%s, %s, %s, NOW() + INTERVAL '3 hours')
+		""", (
+			f"weather:lat={lat},lon={lon}",
+			Jsonb({**daily_data, "date": None}),
+			Jsonb({**hourly_data, "date": None}),
+		)
+	)
 	conn.commit()
 
 	return hourly_data, daily_data

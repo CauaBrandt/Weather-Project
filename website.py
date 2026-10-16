@@ -69,7 +69,9 @@ def city(city):
         "city_id": city_info[6]
     }
 
-    data = cur.execute("SELECT hourly_data, daily_data FROM hourly INNER JOIN daily USING(daily_id) WHERE city_id = %s", (city["city_id"],)).fetchone()
+    data = cur.execute("SELECT hourly_data, daily_data FROM api_cache WHERE cache_key = %s AND expires_at > NOW()", [
+        f"weather:lat={city["latitude"]},lon={city["longitude"]}"
+    ]).fetchone()
     hourly_data, daily_data = data if data else [None, None]
 
     if not daily_data:
@@ -81,6 +83,7 @@ def city(city):
     now = dt.now(pytz.timezone(city["timezone"]))
 
     if now.hour > 3:
+        current_icon = icons_for(hourly_data["weather_code"][now.hour - 3])[0]
         current_temperature = hourly_data["temperature_2m"][now.hour - 3]
         current_apparent_temperature = hourly_data["apparent_temperature"][now.hour - 3]
         visibility = hourly_data["visibility"][now.hour - 3] / 1000
@@ -89,6 +92,7 @@ def city(city):
         wind_dir = hourly_data["wind_direction_10m"][now.hour - 3]
         humidity = hourly_data["relative_humidity_2m"][now.hour - 3]
     else:
+        current_icon = icons_for(hourly_data["weather_code"][24 + now.hour - 3])[0]
         current_temperature = hourly_data["temperature_2m"][24 + now.hour - 3]
         current_apparent_temperature = hourly_data["apparent_temperature"][24 + now.hour - 3]
         visibility = hourly_data["visibility"][24 + now.hour - 3] / 1000
@@ -106,7 +110,7 @@ def city(city):
     return render_template(
             "index.html",
             city=city,
-            current_icon=icons[0],
+            current_icon=current_icon,
             current_weather=current_weather,
             current_temperature=current_temperature,
             current_apparent_temperature=current_apparent_temperature,
@@ -172,6 +176,7 @@ if __name__ == "__main__":
         port="5432"
     )
     cur = conn.cursor()
+    cur.execute("DELETE FROM api_cache WHERE expires_at < NOW()")
 
     logging.getLogger("werkzeug").addFilter(NoStaticFilter())
     
