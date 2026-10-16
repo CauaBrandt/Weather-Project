@@ -8,7 +8,7 @@ const chartInner = document.getElementById("chart-inner");
 const chart = document.getElementById("chart");
 const data = JSON.parse(document.getElementById("chart-data").textContent);
 
-chartInner.style.width = Math.max(data.labels.length * 30, 800) + "px";
+chartInner.style.width = Math.max(data.labels.length * 40, 800) + "px";
 
 const options = {
     responsive: true,
@@ -16,18 +16,24 @@ const options = {
     plugins: { legend: { display: false } },
     scales: {
         x: { ticks: { autoSkip: false } },
-        y: { beginAtZero: true }
+        y: {
+            beginAtZero: true,
+        }
     }
 };
+const temperatureOptions = JSON.parse(JSON.stringify(options));
+temperatureOptions.scales.y.suggestedMax = isCelsius ? 40: 120;
 
-drawChart(data["temperature"], "Temperature (°C)", "red", options)
+drawChart(data["temperature"], "Temperature (°C)", "red", temperatureOptions)
 temperatureButton.addEventListener("click", () => {
     const info = isCelsius ? data["temperature"]: data["temperature"].map(f => invertDegree(f, true));
-    drawChart(info, "Temperature (°C)", "red", options);
+    temperatureOptions.scales.y.suggestedMax = isCelsius ? 40: 120;
+    drawChart(info, "Temperature (°C)", "red", temperatureOptions);
 });
 apparentTemperatureButton.addEventListener("click", () => {
     const info = isCelsius ? data["apparent_temperature"]: data["apparent_temperature"].map(f => invertDegree(f, true));
-    drawChart(info, "Apparent Temperature (°C)", "pink", options);
+    temperatureOptions.scales.y.suggestedMax = isCelsius ? 40: 120;
+    drawChart(info, "Apparent Temperature (°C)", "pink", temperatureOptions);
 });
 HumdityButton.addEventListener("click", () => {
     drawChart(data["humidity"], "Humidity (%)", "darkblue", options);

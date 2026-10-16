@@ -1,10 +1,15 @@
 import psycopg
 import pytz
-from flask import Flask, render_template, redirect, url_for, jsonify, request
+from flask import Flask, render_template, jsonify, request
+import logging
 from datetime import datetime as dt, date
 from insert_to_database import make_request
 
 app = Flask("__name__")
+
+class NoStaticFilter(logging.Filter):
+    def filter(self, record):
+        return "static" not in record.getMessage()
 
 @app.route("/")
 def home():
@@ -31,6 +36,7 @@ def search_city():
         cur.execute("SELECT name FROM cities WHERE latitude = %s AND longitude = %s", (lat, lon,))
         result = cur.fetchone()
         if not result:
+            # Get the closest city
             cur.execute("""
                         SELECT name, latitude, longitude,
                             6371 * 2 * ASIN(SQRT(
@@ -50,7 +56,7 @@ def search_city():
 
 @app.route("/<city>")
 def city(city):
-    cur.execute("SELECT cities.name, latitude, longitude, states.name, timezone FROM cities INNER JOIN states USING(state_id) WHERE cities.name = %s", (city,))
+    cur.execute("SELECT cities.name, latitude, longitude, states.name, country, timezone, city_id FROM cities INNER JOIN states USING(state_id) WHERE cities.name = %s", (city,))
     city_info = cur.fetchone()
 
     city = {
@@ -58,10 +64,19 @@ def city(city):
         "latitude": city_info[1],
         "longitude": city_info[2], 
         "state": city_info[3],
-        "timezone": city_info[4]
+        "country": city_info[4],
+        "timezone": city_info[5],
+        "city_id": city_info[6]
     }
-    
-    hourly_data, daily_data = make_request(city["latitude"], city["longitude"], city["timezone"])
+
+    data = cur.execute("SELECT hourly_data, daily_data FROM hourly INNER JOIN daily USING(daily_id) WHERE city_id = %s", (city["city_id"],)).fetchone()
+    hourly_data, daily_data = data if data else [None, None]
+
+    if not daily_data:
+        hourly_data, daily_data = make_request(city["latitude"], city["longitude"], city["timezone"])
+        print("\nRequested from API!\n")
+    else:
+        print("\nRequested from Database!\n")
     
     now = dt.now(pytz.timezone(city["timezone"]))
 
@@ -86,14 +101,12 @@ def city(city):
     names = [days[(date.today().weekday() + i) % 7] for i in range(0, 7)]
 
     icons = [icons_for(code)[0] for code in daily_data["weather_code"]]
-    current_icon = icons[0]
     current_weather = icons_for(daily_data["weather_code"][0])[1]
-    
     
     return render_template(
             "index.html",
             city=city,
-            current_icon=current_icon,
+            current_icon=icons[0],
             current_weather=current_weather,
             current_temperature=current_temperature,
             current_apparent_temperature=current_apparent_temperature,
@@ -130,7 +143,7 @@ def icons_for(code):
 
 def wind_direction(deg):
     direction = ["S", "SW", "W", "NW", "N", "NE", "E", "SE"]
-    return direction[round(deg / 45 % 8)]
+    return direction[round(deg % 8)]
 
 def chart(data):
     labels = []
@@ -159,5 +172,7 @@ if __name__ == "__main__":
         port="5432"
     )
     cur = conn.cursor()
+
+    logging.getLogger("werkzeug").addFilter(NoStaticFilter())
     
     app.run(debug=True)

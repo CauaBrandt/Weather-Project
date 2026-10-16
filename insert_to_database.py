@@ -1,3 +1,5 @@
+import psycopg
+from psycopg.types.json import Jsonb
 from datetime import datetime as dt
 import openmeteo_requests
 import pandas as pd
@@ -95,8 +97,30 @@ def make_request(lat, lon, timezone):
 		result = []
 
 		for value in values.tolist():
+			if key == "precipitation":
+				result.append(round(value, 2))
+				continue
 			result.append(round(value))
 
 		hourly_data[key] = result
+
+	conn = psycopg.connect(
+		dbname="weather",
+		user="postgres",
+		host="localhost",
+		port="5432"
+	)
+	cur = conn.cursor()
+	city_id = cur.execute("SELECT city_id FROM cities WHERE latitude = %s AND longitude = %s", (lat, lon,)).fetchone()[0]
+	cur.execute("INSERT INTO daily(city_id, daily_data) VALUES(%s, %s)", (
+		city_id,
+		Jsonb({**daily_data, "date": None})
+	))
+	daily_id = cur.execute("SELECT daily_id FROM daily WHERE city_id = %s", (city_id,)).fetchone()[0]
+	cur.execute("INSERT INTO hourly(daily_id, hourly_data) VALUES(%s, %s)", (
+		daily_id,
+		Jsonb({**hourly_data, "date": None})
+	))
+	conn.commit()
 
 	return hourly_data, daily_data

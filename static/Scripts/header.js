@@ -72,6 +72,7 @@ celsiusButton.addEventListener("click", () => {
                 data.temperature.map(f => invertDegree(f, true));
             chart.data.datasets[0].label = `Temperature (${symbol})`;
         }
+        chart.options.scales.y.suggestedMax = isCelsius ? 40: 120;
         chart.update();
     }
 });
