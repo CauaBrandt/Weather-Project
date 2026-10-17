@@ -3,7 +3,6 @@
     <script>
         navigator.geolocation.getCurrentPosition(
             (pos) => {
-                console.log(pos);
                 const lat = pos.coords.latitude;
                 const lon = pos.coords.longitude;
                 fetch(`/search_city?lat=${lat}&lon=${lon}`)

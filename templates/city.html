@@ -3,11 +3,11 @@
     <head>
         <title>Weather</title>
 
-        <link rel="stylesheet" href="../static/styles/general.css">
-        <link rel="stylesheet" href="../static/styles/header.css">
-        <link rel="stylesheet" href="../static/styles/daily_info.css">
-        <link rel="stylesheet" href="../static/styles/graph.css">
-        <link rel="stylesheet" href="../static/styles/forecast.css">
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles/general.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles/header.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles/daily_info.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles/graph.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles/forecast.css') }}">
 
         <!-- Get Roboto Font -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -90,8 +90,8 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
             crossorigin=""></script>
-    <script src="../static/Scripts/map.js"></script>
-    <script src="../static/Scripts/header.js"></script>
-    <script src="../static/Scripts/daily_info.js"></script>
-    <script src="../static/Scripts/graph.js"></script>
+    <script src="{{ url_for('static', filename='Scripts/map.js') }}"></script>
+    <script src="{{ url_for('static', filename='Scripts/header.js') }}"></script>
+    <script src="{{ url_for('static', filename='Scripts/daily_info.js') }}"></script>
+    <script src="{{ url_for('static', filename='Scripts/graph.js') }}"></script>
 </html>

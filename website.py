@@ -37,16 +37,17 @@ def search_city():
         result = cur.fetchone()
         if not result:
             # Get the closest city
-            cur.execute("""
-                        SELECT name, latitude, longitude,
-                            6371 * 2 * ASIN(SQRT(
-                                POWER(SIN(RADIANS(latitude - %s) / 2), 2) +
-                                COS(RADIANS(%s)) * COS(RADIANS(latitude)) *
-                                POWER(SIN(RADIANS(longitude - %s) / 2), 2)
-                            )) AS distance_km
-                        FROM cities
-                        ORDER BY distance_km
-                        LIMIT 1
+            cur.execute(
+                """
+                    SELECT name, latitude, longitude,
+                        6371 * 2 * ASIN(SQRT(
+                            POWER(SIN(RADIANS(latitude - %s) / 2), 2) +
+                            COS(RADIANS(%s)) * COS(RADIANS(latitude)) *
+                            POWER(SIN(RADIANS(longitude - %s) / 2), 2)
+                        )) AS distance_km
+                    FROM cities
+                    ORDER BY distance_km
+                    LIMIT 1
                 """, (lat, lat, lon)
             )
 
