@@ -1,7 +1,10 @@
 # Untracked files
 
+flask_test.py
+
 .venv
 .vscode
 .cache.sqlite
 *.csv
 .env
+*.sh

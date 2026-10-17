@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Weather</title>
+
+        <link rel="stylesheet" href="../static/styles/general.css">
+        <link rel="stylesheet" href="../static/styles/header.css">
+        <link rel="stylesheet" href="../static/styles/daily_info.css">
+        <link rel="stylesheet" href="../static/styles/graph.css">
+        <link rel="stylesheet" href="../static/styles/forecast.css">
+
+        <!-- Get Roboto Font -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+        
+        <!-- Get LeafLet CSS -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+            crossorigin=""/>
+
+        <!-- Get Chart lib -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </head>
+    <body>
+        <header id="header">
+            <div id="left"></div>
+            <div id="middle">
+                <form id="search-bar-container">
+                    <input id="search-bar" type="text" placeholder="Search">
+                    <ul id="city-list"></ul>
+                </form>
+            </div>
+            <div id="right">
+                <button id="degree-change">
+                    <p class="degree">&#176;C</p>
+                    <img src="../static/Icons/DownArrow.svg">
+                </button>
+            </div>
+        </header>
+        <main id="info">
+            <div id="current-weather-container">
+                <p id="current-weather-text">Current weather</p>
+                <p id="city">{{ city.name }}, {{ city.state }}, {{ city.country }}</p>
+                <p id="date"></p>
+            </div>
+            <div id="daily-info">
+                <img id="weather-image" src="{{ url_for('static', filename='Icons/' ~ current_icon) }}">
+                <div id="daily-weather-info">
+                    <p id="weather-code">{{ current_weather }}</p>
+                    <div id="temperature-container">
+                        <button id="temperature"><span class="temperature">{{ current_temperature }}</span> <span class="degree">&#176;C</span></button>
+                        <p id="apparent-temperature">Feels like</p>
+                        <button id="apparent-temperature-button"><span class="temperature apparent-temperature-number">{{ current_apparent_temperature }}</span><span class="degree apparent-temperature-degree">&#176;C</span></button>
+                    </div>
+                </div>
+            </div>
+            <div id="chart-container">
+                <div id="chart-scroller">
+                    <div id="chart-inner">
+                        <canvas id="chart"></canvas>
+                    </div>
+                </div>
+                <div id="extra-info">
+                    <button id="humidity">Humidity: {{ humidity }}&#37;</button>
+                    <p id="preciptation-chance">Precipitation: {{ precipitation_chance }} mm</p>
+                    <button id="visibility">Visibility: {{ visibility }} Km</button>
+                    <button id="wind-speed">Wind Speed: {{ wind_speed }} Km/h <span id="wind-direction">{{ wind_direction }}</span></button>
+                </div>
+            </div>
+            <div id="forecast-map">
+                <div id="forecast">
+                    {% for max, min, weekday, icon in forecast %}
+                    <div id="day-info">
+                        <img id="day-weather" src="{{ url_for('static', filename='Icons/' ~ icon) }}">
+                        <div id="temperature-max-min">
+                            <p id="week-day">{{ weekday }}</p>
+                            <p id="max"><span class="temperature">{{ max }}</span> <span class="degree">&#176;C</span></p>
+                            <p id="min"><span class="temperature">{{ min }}</span> <span class="degree">&#176;C</span></p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div id="map"></div>                
+            </div>
+        </main>
+    </body>
+    <script type="application/json" id="chart-data">{{ data | tojson }}</script>
+    <script type="application/json" id="city-data">{{ city | tojson }}</script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+    <script src="../static/Scripts/map.js"></script>
+    <script src="../static/Scripts/header.js"></script>
+    <script src="../static/Scripts/daily_info.js"></script>
+    <script src="../static/Scripts/graph.js"></script>
+</html>

@@ -1,10 +1,6 @@
-# Import to use queries
 import psycopg
-# Import to use timer
-import time
-# Import date
+from psycopg.types.json import Jsonb
 from datetime import datetime as dt
-import pytz
 import openmeteo_requests
 import pandas as pd
 import requests_cache
@@ -24,9 +20,9 @@ def make_request(lat, lon, timezone):
 		"latitude": lat,
 		"longitude": lon,
 		"daily": ["weather_code", "temperature_2m_max", "temperature_2m_min"],
-		"hourly": ["temperature_2m", "precipitation", "wind_speed_10m", "wind_direction_10m", "uv_index", "apparent_temperature"],
+		"hourly": ["weather_code", "temperature_2m", "visibility", "precipitation", "wind_speed_10m", "wind_direction_10m", "uv_index", "apparent_temperature", "relative_humidity_2m"],
 		"timezone": timezone,
-		"forecast_days": 2,
+		"forecast_days": 7
 	}
 	
 	responses = openmeteo.weather_api(url, params = params)
@@ -36,12 +32,15 @@ def make_request(lat, lon, timezone):
 
 	# Process hourly data. The order of variables needs to be the same as requested.
 	hourly = response.Hourly()
-	hourly_temperature_2m = hourly.Variables(0).ValuesAsNumpy()
-	hourly_precipitation = hourly.Variables(1).ValuesAsNumpy()
-	hourly_wind_speed_10m = hourly.Variables(2).ValuesAsNumpy()
-	hourly_wind_direction_10m = hourly.Variables(3).ValuesAsNumpy()
-	hourly_uv_index = hourly.Variables(4).ValuesAsNumpy()
-	hourly_apparent_temperature = hourly.Variables(5).ValuesAsNumpy()
+	hourly_weather_code = hourly.Variables(0).ValuesAsNumpy()
+	hourly_temperature_2m = hourly.Variables(1).ValuesAsNumpy()
+	hourly_visibility = hourly.Variables(2).ValuesAsNumpy()
+	hourly_precipitation = hourly.Variables(3).ValuesAsNumpy()
+	hourly_wind_speed_10m = hourly.Variables(4).ValuesAsNumpy()
+	hourly_wind_direction_10m = hourly.Variables(5).ValuesAsNumpy()
+	hourly_uv_index = hourly.Variables(6).ValuesAsNumpy()
+	hourly_apparent_temperature = hourly.Variables(7).ValuesAsNumpy()
+	hourly_relative_humidity_2m = hourly.Variables(8).ValuesAsNumpy()
 
 	hourly_data = {
 		"date": pd.date_range(
@@ -52,12 +51,15 @@ def make_request(lat, lon, timezone):
 		)
 	}
 
+	hourly_data["weather_code"] = hourly_weather_code
 	hourly_data["temperature_2m"] = hourly_temperature_2m
+	hourly_data["visibility"] = hourly_visibility
 	hourly_data["precipitation"] = hourly_precipitation
 	hourly_data["wind_speed_10m"] = hourly_wind_speed_10m
 	hourly_data["wind_direction_10m"] = hourly_wind_direction_10m
 	hourly_data["uv_index"] = hourly_uv_index
 	hourly_data["apparent_temperature"] = hourly_apparent_temperature
+	hourly_data["relative_humidity_2m"] = hourly_relative_humidity_2m
 
 	# Process daily data. The order of variables needs to be the same as requested.
 	daily = response.Daily()
@@ -97,17 +99,13 @@ def make_request(lat, lon, timezone):
 		result = []
 
 		for value in values.tolist():
-			if key == "temperature_2m" or key == "apparent_temperature":
-				result.append(round(value))
-			else:
+			if key == "precipitation":
 				result.append(round(value, 2))
+				continue
+			result.append(round(value))
 
 		hourly_data[key] = result
 
-	return hourly_data, daily_data
-
-if __name__ == "__main__":
-	# Get cities locations
 	conn = psycopg.connect(
 		dbname="weather",
 		user="postgres",
@@ -116,44 +114,15 @@ if __name__ == "__main__":
 	)
 	cur = conn.cursor()
 
-	# Get cities lat and lon
-	while True:
-		cur.execute("SELECT name, latitude, longitude, city_id, timezone FROM cities ORDER BY name")
-		for name, lat, lon, city_id, timezone in cur.fetchall():			
-			# Insert data to the database
-			date = dt.date(dt.now(pytz.timezone(timezone)))
-			hourly_data, daily_data = make_request(lat, lon, timezone)
+	cur.execute(
+		"""INSERT INTO api_cache(cache_key, daily_data, hourly_data, expires_at) 
+			VALUES(%s, %s, %s, NOW() + INTERVAL '3 hours')
+		""", (
+			f"weather:lat={lat},lon={lon}",
+			Jsonb({**daily_data, "date": None}),
+			Jsonb({**hourly_data, "date": None}),
+		)
+	)
+	conn.commit()
 
-			# Insert to daily
-			cur.execute(f"SELECT * FROM daily WHERE city_id = %s AND date[1] = %s", (city_id, date))
-			if not cur.fetchone():
-				cur.execute("INSERT INTO daily(date, weather_code, temperature_2m_max, temperature_2m_min, city_id) VALUES(%s, %s, %s, %s, %s)", (
-					daily_data["date"],
-					daily_data["weather_code"],
-					daily_data["temperature_2m_max"],
-					daily_data["temperature_2m_min"],
-					city_id
-				))
-				conn.commit()
-				print(f"Inserted daily for: {name}")
-
-			# Insert to hourly
-			cur.execute(f"SELECT daily_id FROM daily WHERE city_id = %s AND date[1] = %s", (city_id, date))
-			daily_id = cur.fetchone()[0]
-
-			cur.execute(f"SELECT * FROM hourly WHERE daily_id = {daily_id}")
-			if not cur.fetchone():
-				cur.execute("INSERT INTO hourly(daily_id, temperature_2m, apparent_temperature, precipitation, wind_speed_10m, wind_direction_10m, uv_index) VALUES(%s, %s, %s, %s, %s, %s, %s)", (
-					daily_id,
-					hourly_data["temperature_2m"],
-					hourly_data["apparent_temperature"],
-					hourly_data["precipitation"],
-					hourly_data["wind_speed_10m"],
-					hourly_data["wind_direction_10m"],
-					hourly_data["uv_index"]
-				))
-
-				conn.commit()
-				print(f"Inserted hourly for: {name}\nID:{city_id}")
-
-			time.sleep(10)
+	return hourly_data, daily_data

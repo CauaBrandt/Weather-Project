@@ -1,0 +1,22 @@
+<DOCTYPE html>
+<html>
+    <head></head>
+    <script>
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                console.log(pos);
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+                fetch(`/search_city?lat=${lat}&lon=${lon}`)
+                .then((res) => res.json())
+                .then((data) => {
+                    window.location.href = `/${data.cities[0]}`;
+                });
+            },
+            (error) => {
+                // Default city
+                window.location.href = `/São Paulo`;
+            }
+        );
+    </script>
+</html>
