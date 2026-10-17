@@ -3,7 +3,7 @@ import pytz
 from flask import Flask, render_template, jsonify, request
 import logging
 from datetime import datetime as dt, date
-from insert_to_database import make_request
+from api_request import make_request
 
 app = Flask("__name__")
 
@@ -13,7 +13,7 @@ class NoStaticFilter(logging.Filter):
 
 @app.route("/")
 def home():
-    return render_template("temp.html")
+    return render_template("index.html")
 
 @app.route("/search_city")
 def search_city():
@@ -108,7 +108,7 @@ def city(city):
     current_weather = icons_for(daily_data["weather_code"][0])[1]
     
     return render_template(
-            "index.html",
+            "city.html",
             city=city,
             current_icon=current_icon,
             current_weather=current_weather,
@@ -176,7 +176,9 @@ if __name__ == "__main__":
         port="5432"
     )
     cur = conn.cursor()
+
     cur.execute("DELETE FROM api_cache WHERE expires_at < NOW()")
+    conn.commit()
 
     logging.getLogger("werkzeug").addFilter(NoStaticFilter())
     
