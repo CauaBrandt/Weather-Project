@@ -97,7 +97,7 @@ def city(city):
     now = dt.now(pytz.timezone(city["timezone"]))
 
     if now.hour > 3:
-        current_icon = icons_for(hourly_data["weather_code"][now.hour - 3])[0]
+        current_weather = icons_for(hourly_data["weather_code"][now.hour - 3])
         current_temperature = hourly_data["temperature_2m"][now.hour - 3]
         current_apparent_temperature = hourly_data["apparent_temperature"][now.hour - 3]
         visibility = hourly_data["visibility"][now.hour - 3] / 1000
@@ -106,7 +106,7 @@ def city(city):
         wind_dir = hourly_data["wind_direction_10m"][now.hour - 3]
         humidity = hourly_data["relative_humidity_2m"][now.hour - 3]
     else:
-        current_icon = icons_for(hourly_data["weather_code"][24 + now.hour - 3])[0]
+        current_weather = icons_for(hourly_data["weather_code"][24 + now.hour - 3])
         current_temperature = hourly_data["temperature_2m"][24 + now.hour - 3]
         current_apparent_temperature = hourly_data["apparent_temperature"][24 + now.hour - 3]
         visibility = hourly_data["visibility"][24 + now.hour - 3] / 1000
@@ -119,13 +119,14 @@ def city(city):
     names = [days[(date.today().weekday() + i) % 7] for i in range(0, 7)]
 
     icons = [icons_for(code)[0] for code in daily_data["weather_code"]]
-    current_weather = icons_for(daily_data["weather_code"][0])[1]
+    current_icon = current_weather[0]
+    current_condition = current_weather[1]
     
     return render_template(
             "city.html",
             city=city,
             current_icon=current_icon,
-            current_weather=current_weather,
+            current_condition=current_condition,
             current_temperature=current_temperature,
             current_apparent_temperature=current_apparent_temperature,
             humidity=humidity,

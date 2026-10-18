@@ -34,7 +34,7 @@
             <div id="right">
                 <button id="degree-change">
                     <p class="degree">&#176;C</p>
-                    <img src="../static/Icons/DownArrow.svg">
+                    <img src="{{ url_for('static', filename='Icons/DownArrow.svg') }}">
                 </button>
             </div>
         </header>
@@ -47,7 +47,7 @@
             <div id="daily-info">
                 <img id="weather-image" src="{{ url_for('static', filename='Icons/' ~ current_icon) }}">
                 <div id="daily-weather-info">
-                    <p id="weather-code">{{ current_weather }}</p>
+                    <p id="weather-code">{{ current_condition }}</p>
                     <div id="temperature-container">
                         <button id="temperature"><span class="temperature">{{ current_temperature }}</span> <span class="degree">&#176;C</span></button>
                         <p id="apparent-temperature">Feels like</p>
