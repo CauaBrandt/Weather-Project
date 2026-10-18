@@ -3,16 +3,11 @@ import pytz
 from flask import Flask, render_template, jsonify, request
 import logging
 from datetime import datetime as dt, date
-from api_request import make_request
+from api_request import make_request, DATABASE_URL
 
 app = Flask("__name__")
 
-conn = psycopg.connect(
-    dbname="weather",
-    user="postgres",
-    host="localhost",
-    port="5432"
-)
+conn = psycopg.connect(DATABASE_URL)
 cur = conn.cursor()
 
 cur.execute("DELETE FROM api_cache WHERE expires_at < NOW()")
