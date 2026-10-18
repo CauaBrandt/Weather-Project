@@ -7,9 +7,22 @@ from api_request import make_request
 
 app = Flask("__name__")
 
+conn = psycopg.connect(
+    dbname="weather",
+    user="postgres",
+    host="localhost",
+    port="5432"
+)
+cur = conn.cursor()
+
+cur.execute("DELETE FROM api_cache WHERE expires_at < NOW()")
+conn.commit()
+
 class NoStaticFilter(logging.Filter):
     def filter(self, record):
         return "static" not in record.getMessage()
+
+logging.getLogger("werkzeug").addFilter(NoStaticFilter())
 
 @app.route("/")
 def home():
@@ -170,17 +183,4 @@ def chart(data):
     return chart
 
 if __name__ == "__main__":
-    conn = psycopg.connect(
-        dbname="weather",
-        user="postgres",
-        host="localhost",
-        port="5432"
-    )
-    cur = conn.cursor()
-
-    cur.execute("DELETE FROM api_cache WHERE expires_at < NOW()")
-    conn.commit()
-
-    logging.getLogger("werkzeug").addFilter(NoStaticFilter())
-    
-    app.run(debug=True)
+    app.run()
