@@ -85,6 +85,7 @@
             </div>
         </main>
     </body>
+    <script src="{{ url_for('static', filename='Scripts/data.js') }}"></script>
     <script type="application/json" id="chart-data">{{ data | tojson }}</script>
     <script type="application/json" id="city-data">{{ city | tojson }}</script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"

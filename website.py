@@ -3,11 +3,15 @@ import pytz
 from flask import Flask, render_template, jsonify, request
 import logging
 from datetime import datetime as dt, date
-from api_request import make_request, DATABASE_URL
 
 app = Flask("__name__")
 
-conn = psycopg.connect(DATABASE_URL)
+conn = psycopg.connect(
+    dbname="weather",
+    user="postgres",
+    host="localhost",
+    port="5432"
+)
 cur = conn.cursor()
 
 cur.execute("DELETE FROM api_cache WHERE expires_at < NOW()")
@@ -22,6 +26,16 @@ logging.getLogger("werkzeug").addFilter(NoStaticFilter())
 @app.route("/")
 def home():
     return render_template("index.html")
+
+@app.route("/check_city")
+def check_city():
+    lat = request.args.get("lat", type=float)
+    lon = request.args.get("lon", type=float)
+    data = cur.execute("SELECT hourly_data, daily_data FROM api_cache WHERE cache_key = %s AND expires_at > NOW()", [
+            f"weather:lat={lat},lon={lon}"
+    ]).fetchone()
+
+    return jsonify(data)
 
 @app.route("/search_city")
 def search_city():
@@ -41,7 +55,7 @@ def search_city():
                 if not city in result:
                     result.append(city)
     elif lat:
-        cur.execute("SELECT name FROM cities WHERE latitude = %s AND longitude = %s", (lat, lon,))
+        cur.execute("SELECT name, latitude, longitude FROM cities WHERE latitude = %s AND longitude = %s", (lat, lon,))
         result = cur.fetchone()
         if not result:
             # Get the closest city
@@ -60,34 +74,27 @@ def search_city():
             )
 
             result = cur.fetchone()
-
+    
     return jsonify({ "cities": result })
 
-@app.route("/<city>")
-def city(city):
-    cur.execute("SELECT cities.name, latitude, longitude, states.name, country, timezone, city_id FROM cities INNER JOIN states USING(state_id) WHERE cities.name = %s", (city,))
-    city_info = cur.fetchone()
+@app.route("/city", methods=["POST"])
+def city():
+    data = request.get_json()
+    current_data = data["current_data"]
+    daily_data = data["daily_data"]
+    hourly_data = data["hourly_data"]
+
+    city_info = cur.execute("SELECT cities.name, states.name, country, timezone FROM cities INNER JOIN states USING(state_id) WHERE latitude = %s AND longitude = %s", [
+        data["latitude"],
+        data["longitude"]
+    ]).fetchone()
 
     city = {
         "name": city_info[0],
-        "latitude": city_info[1],
-        "longitude": city_info[2], 
-        "state": city_info[3],
-        "country": city_info[4],
-        "timezone": city_info[5],
-        "city_id": city_info[6]
+        "state": city_info[1],
+        "country": city_info[2],
+        "timezone": city_info[3]
     }
-
-    data = cur.execute("SELECT hourly_data, daily_data FROM api_cache WHERE cache_key = %s AND expires_at > NOW()", [
-        f"weather:lat={city["latitude"]},lon={city["longitude"]}"
-    ]).fetchone()
-    hourly_data, daily_data = data if data else [None, None]
-
-    if not daily_data:
-        hourly_data, daily_data = make_request(city["latitude"], city["longitude"], city["timezone"])
-        print("\nRequested from API!\n")
-    else:
-        print("\nRequested from Database!\n")
     
     now = dt.now(pytz.timezone(city["timezone"]))
 
@@ -179,4 +186,4 @@ def chart(data):
     return chart
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)

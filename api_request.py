@@ -1,6 +1,5 @@
 import psycopg
 from psycopg.types.json import Jsonb
-import os
 from datetime import datetime as dt
 import openmeteo_requests
 import pandas as pd
@@ -14,8 +13,6 @@ openmeteo = openmeteo_requests.Client(session = retry_session)
 
 # The order of variables in hourly or daily is important to assign them correctly below
 url = "https://api.open-meteo.com/v1/forecast"
-
-DATABASE_URL = os.environ.get("DATABASE_URL")
 
 def make_request(lat, lon, timezone):
 	"Make the api request to Open Meteo, using a latitude and longitude"
@@ -109,7 +106,12 @@ def make_request(lat, lon, timezone):
 
 		hourly_data[key] = result
 
-	conn = psycopg.connect(DATABASE_URL)
+	conn = psycopg.connect(
+        dbname="weather",
+        user="postgres",
+        host="localhost",
+        port="5432"
+    )
 	cur = conn.cursor()
 
 	cur.execute(

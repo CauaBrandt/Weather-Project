@@ -1,5 +1,6 @@
 <DOCTYPE html>
 <html>
+    <script src="{{ url_for('static', filename='Scripts/data.js') }}"></script>
     <script>
         navigator.geolocation.getCurrentPosition(
             (pos) => {
@@ -8,12 +9,13 @@
                 fetch(`/search_city?lat=${lat}&lon=${lon}`)
                 .then((res) => res.json())
                 .then((data) => {
-                    window.location.href = `/${data.cities[0]}`;
+                    console.log(data);
+                    changeCity(data[1], data[2])
                 });
             },
             (error) => {
                 // Default city
-                window.location.href = `/São Paulo`;
+                changeCity(-23.5329, -46.6395)
             }
         );
     </script>

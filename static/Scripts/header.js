@@ -16,20 +16,22 @@ searchBar.addEventListener("input", () => {
         return;
     }
     
-    cityList.innerHTML = ""
+    cityList.innerHTML = "";
     timer = setTimeout(async () => {
         const response = await fetch("/search_city?q=" + encodeURIComponent(query));
         const data = await response.json();
-
+        
         if (!data.cities.length) {
             console.log("City not found!");
-            return
+            return;
         }
         data.cities.forEach(city => {
             const cityButton = document.createElement("li");
             cityButton.textContent = `${city[0]}, ${city[1]}`
             cityButton.addEventListener("click", () => {
-                window.location.href = `${encodeURIComponent(city[0])}`
+                getWeatherData(city[2], city[3]).then(data => {
+                    window.location.href = `/city?data=${data}`
+                });
             });
             cityList.appendChild(cityButton);
         });
