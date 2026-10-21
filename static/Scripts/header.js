@@ -30,7 +30,7 @@ searchBar.addEventListener("input", () => {
             cityButton.textContent = `${city[0]}, ${city[1]}`
             cityButton.addEventListener("click", () => {
                 getWeatherData(city[2], city[3]).then(data => {
-                    window.location.href = `/city?data=${data}`
+                    console.log("Faz o L!!!");
                 });
             });
             cityList.appendChild(cityButton);

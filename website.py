@@ -1,4 +1,5 @@
 import psycopg
+from psycopg.types.json import Jsonb
 import pytz
 from flask import Flask, render_template, jsonify, request
 import logging
@@ -31,7 +32,7 @@ def home():
 def check_city():
     lat = request.args.get("lat", type=float)
     lon = request.args.get("lon", type=float)
-    data = cur.execute("SELECT hourly_data, daily_data FROM api_cache WHERE cache_key = %s AND expires_at > NOW()", [
+    data = cur.execute("SELECT data FROM api_cache WHERE cache_key = %s AND expires_at > NOW()", [
             f"weather:lat={lat},lon={lon}"
     ]).fetchone()
 
@@ -45,23 +46,22 @@ def search_city():
     lon = request.args.get("lon", type=float)
 
     if query:
-        cur.execute("SELECT cities.name, states.name, latitude, longitude FROM cities INNER JOIN states USING(state_id) WHERE LOWER(cities.name) LIKE %s LIMIT %s", (f"{query}%", max_search,))
-        result = cur.fetchall()
+        cur.execute("SELECT cities.name, states.name, country, latitude, longitude FROM cities INNER JOIN states USING(state_id) WHERE LOWER(cities.name) LIKE %s LIMIT %s", (f"{query}%", max_search,))
+        response = cur.fetchall()
 
-        if len(result) < max_search:
-            complement = max_search - len(result)
-            cur.execute("SELECT cities.name, states.name, latitude, longitude FROM cities INNER JOIN states USING(state_id) WHERE LOWER(cities.name) LIKE %s LIMIT %s", (f"%{query}%", complement,))
+        if len(response) < max_search:
+            complement = max_search - len(response)
+            cur.execute("SELECT cities.name, states.name, country, latitude, longitude FROM cities INNER JOIN states USING(state_id) WHERE LOWER(cities.name) LIKE %s LIMIT %s", (f"%{query}%", complement,))
             for city in cur.fetchall():
-                if not city in result:
-                    result.append(city)
+                if not city in response:
+                    response.append(city)
     elif lat:
-        cur.execute("SELECT name, latitude, longitude FROM cities WHERE latitude = %s AND longitude = %s", (lat, lon,))
-        result = cur.fetchone()
-        if not result:
+        cur.execute("SELECT cities.name, states.name, country, latitude, longitude FROM cities INNER JOIN states USING(state_id) WHERE latitude = %s AND longitude = %s", (lat, lon))
+        response = cur.fetchone()
+        if not response:
             # Get the closest city
             cur.execute(
-                """
-                    SELECT name, latitude, longitude,
+                """SELECT name, latitude, longitude,
                         6371 * 2 * ASIN(SQRT(
                             POWER(SIN(RADIANS(latitude - %s) / 2), 2) +
                             COS(RADIANS(%s)) * COS(RADIANS(latitude)) *
@@ -73,117 +73,32 @@ def search_city():
                 """, (lat, lat, lon)
             )
 
-            result = cur.fetchone()
+            response = cur.fetchone()
+
+    result = {
+        "name": response[0],
+        "state": response[1],
+        "country": response[2],
+        "latitude": response[3],
+        "longitude": response[4],
+    }
     
-    return jsonify({ "cities": result })
+    return jsonify(result)
 
 @app.route("/city", methods=["POST"])
 def city():
     data = request.get_json()
-    current_data = data["current_data"]
-    daily_data = data["daily_data"]
-    hourly_data = data["hourly_data"]
 
-    city_info = cur.execute("SELECT cities.name, states.name, country, timezone FROM cities INNER JOIN states USING(state_id) WHERE latitude = %s AND longitude = %s", [
-        data["latitude"],
-        data["longitude"]
-    ]).fetchone()
-
-    city = {
-        "name": city_info[0],
-        "state": city_info[1],
-        "country": city_info[2],
-        "timezone": city_info[3]
-    }
-    
-    now = dt.now(pytz.timezone(city["timezone"]))
-
-    if now.hour > 3:
-        current_weather = icons_for(hourly_data["weather_code"][now.hour - 3])
-        current_temperature = hourly_data["temperature_2m"][now.hour - 3]
-        current_apparent_temperature = hourly_data["apparent_temperature"][now.hour - 3]
-        visibility = hourly_data["visibility"][now.hour - 3] / 1000
-        preciptation = hourly_data["precipitation"][now.hour - 3]
-        wind_speed = hourly_data["wind_speed_10m"][now.hour - 3]
-        wind_dir = hourly_data["wind_direction_10m"][now.hour - 3]
-        humidity = hourly_data["relative_humidity_2m"][now.hour - 3]
-    else:
-        current_weather = icons_for(hourly_data["weather_code"][24 + now.hour - 3])
-        current_temperature = hourly_data["temperature_2m"][24 + now.hour - 3]
-        current_apparent_temperature = hourly_data["apparent_temperature"][24 + now.hour - 3]
-        visibility = hourly_data["visibility"][24 + now.hour - 3] / 1000
-        preciptation = hourly_data["precipitation"][24 + now.hour - 3]
-        wind_speed = hourly_data["wind_speed_10m"][24 + now.hour - 3]
-        wind_dir = hourly_data["wind_direction_10m"][24 + now.hour - 3]
-        humidity = hourly_data["relative_humidity_2m"][24 + now.hour - 3]
-
-    days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-    names = [days[(date.today().weekday() + i) % 7] for i in range(0, 7)]
-
-    icons = [icons_for(code)[0] for code in daily_data["weather_code"]]
-    current_icon = current_weather[0]
-    current_condition = current_weather[1]
-    
-    return render_template(
-            "city.html",
-            city=city,
-            current_icon=current_icon,
-            current_condition=current_condition,
-            current_temperature=current_temperature,
-            current_apparent_temperature=current_apparent_temperature,
-            humidity=humidity,
-            precipitation_chance=preciptation,
-            visibility=visibility,
-            wind_speed=wind_speed,
-            wind_direction=wind_direction(wind_dir),
-            data=chart(hourly_data),
-            forecast=list(zip(
-                daily_data["temperature_2m_max"],
-                daily_data["temperature_2m_min"],
-                names,
-                icons
-            ))
+    cur.execute(
+        """INSERT INTO api_cache(cache_key, data, expires_at) 
+            VALUES(%s, %s, NOW() + INTERVAL '3 hours')
+        """, (
+            f"weather:lat={data["latitude"]},lon={data["longitude"]}",
+            Jsonb(data),
         )
-
-def icons_for(code):
-    if code == 0:
-        return ("Sun.svg", "Sunny")
-    if code in (1, 2):
-        return ("PartlyCloudy.svg", "Partly Cloudy")
-    if code == 3:
-        return ("Cloud.svg", "Cloudy")
-    if code in (45, 48):
-        return ("Fog.svg", "Foggy")
-    if code in range(51, 68) or code in range(80, 83):
-        return ("RainCloud.svg", "Rain")
-    if code in range(71, 78) or code in (85, 86):
-        return ("Snow.svg", "Snowing")
-    if code in (95, 96, 99):
-        return ("ThunderCloud.svg", "Thunderstorm")
-    return ("Cloud.svg", "Cloudy")
-
-def wind_direction(deg):
-    direction = ["S", "SW", "W", "NW", "N", "NE", "E", "SE"]
-    return direction[round(deg % 8)]
-
-def chart(data):
-    labels = []
-    i = 3
-    for _ in range(7 * 24):
-        labels.append(f"{i}h")
-        i += 1
-        if i > 23:
-            i = 0
-
-    chart = {
-        "labels": labels,
-        "temperature": data["temperature_2m"],
-        "apparent_temperature": data["apparent_temperature"],
-        "humidity": data["relative_humidity_2m"],
-        "visibility": [n / 1000 for n in data["visibility"]],
-        "wind_speed": data["wind_speed_10m"]
-    }
-    return chart
+    )
+    print("Inserted to database!")
+    conn.commit()
 
 if __name__ == "__main__":
     app.run(debug=True)
