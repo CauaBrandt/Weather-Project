@@ -105,15 +105,18 @@ function drawChart(info, label, color, options) {
     });
 }
 
-async function init() {
-    const { lat, lon } = await getPosition();
+async function init(cityData = undefined, cityInfo = undefined) {
+    if (cityData == undefined || cityInfo == undefined) {
+        const { lat, lon } = await getPosition();
 
-    const res = await fetch(`/search_city?lat=${lat}&lon=${lon}`);
-    const cityInfo = await res.json();
-    
-    const json = await getWeatherData(cityInfo.latitude, cityInfo.longitude);
-    const cityData = Object.keys(json).length === 1 ? json[0]: json;
-    console.log(cityData);
+        const res = await fetch(`/search_city?lat=${lat}&lon=${lon}`);
+        const cityJson = await res.json();
+        cityInfo = cityJson.cities[0];
+        
+        const json = await getWeatherData(cityInfo.latitude, cityInfo.longitude);
+        cityData = Object.keys(json).length === 1 ? json[0]: json;
+        console.log(cityData);
+    }
 
     // Data
     const currentData = cityData.current;
@@ -236,6 +239,7 @@ async function init() {
 
     // Forecast
     const forecast = document.getElementById("forecast");
+    forecast.innerHTML = "";
     for (let i = 0; i < 7; i++) {
         const dayInfo = document.createElement("div");
         dayInfo.id = "day-info";

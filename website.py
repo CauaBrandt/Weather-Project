@@ -41,9 +41,11 @@ def check_city():
 @app.route("/search_city")
 def search_city():
     max_search = 8
+    result = []
     query = request.args.get("q", "").strip().lower()
     lat = request.args.get("lat", type=float)
     lon = request.args.get("lon", type=float)
+
 
     if query:
         cur.execute("SELECT cities.name, states.name, country, latitude, longitude FROM cities INNER JOIN states USING(state_id) WHERE LOWER(cities.name) LIKE %s LIMIT %s", (f"{query}%", max_search,))
@@ -55,6 +57,15 @@ def search_city():
             for city in cur.fetchall():
                 if not city in response:
                     response.append(city)
+
+        for city in response:
+            result.append({
+                "name": city[0],
+                "state": city[1],
+                "country": city[2],
+                "latitude": city[3],
+                "longitude": city[4],
+            })
     elif lat:
         cur.execute("SELECT cities.name, states.name, country, latitude, longitude FROM cities INNER JOIN states USING(state_id) WHERE latitude = %s AND longitude = %s", (lat, lon))
         response = cur.fetchone()
@@ -74,16 +85,16 @@ def search_city():
             )
 
             response = cur.fetchone()
-
-    result = {
-        "name": response[0],
-        "state": response[1],
-        "country": response[2],
-        "latitude": response[3],
-        "longitude": response[4],
-    }
+        
+        result = [{
+            "name": response[0],
+            "state": response[1],
+            "country": response[2],
+            "latitude": response[3],
+            "longitude": response[4],
+        }]
     
-    return jsonify(result)
+    return jsonify({"cities": result})
 
 @app.route("/city", methods=["POST"])
 def city():

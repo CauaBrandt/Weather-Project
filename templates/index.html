@@ -69,18 +69,7 @@
                 </div>
             </div>
             <div id="forecast-map">
-                <div id="forecast">
-                    {% for max, min, weekday, icon in forecast %}
-                    <div id="day-info">
-                        <img id="day-weather" src="{{ url_for('static', filename='Icons/' ~ icon) }}">
-                        <div id="temperature-max-min">
-                            <p id="week-day">{{ weekday }}</p>
-                            <p id="max"><span class="temperature">{{ max }}</span> <span class="degree">&#176;C</span></p>
-                            <p id="min"><span class="temperature">{{ min }}</span> <span class="degree">&#176;C</span></p>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
+                <div id="forecast"></div>
                 <div id="map"></div>                
             </div>
         </main>

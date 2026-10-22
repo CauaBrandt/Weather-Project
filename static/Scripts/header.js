@@ -22,16 +22,15 @@ searchBar.addEventListener("input", () => {
         const data = await response.json();
         
         if (!data.cities.length) {
-            console.log("City not found!");
             return;
         }
         data.cities.forEach(city => {
             const cityButton = document.createElement("li");
-            cityButton.textContent = `${city[0]}, ${city[1]}`
-            cityButton.addEventListener("click", () => {
-                getWeatherData(city[2], city[3]).then(data => {
-                    console.log("Faz o L!!!");
-                });
+            cityButton.textContent = `${city.name}, ${city.state}`
+            cityButton.addEventListener("click", async () => {
+                const json = await getWeatherData(city.latitude, city.longitude);
+                const cityData = Object.keys(json).length === 1 ? json[0]: json;
+                init(cityData, city);
             });
             cityList.appendChild(cityButton);
         });
