@@ -53,8 +53,8 @@ async function getWeatherData(lat, lon) {
 function getPosition() {
     return new Promise(resolve => {
         navigator.geolocation.getCurrentPosition(
-            (pos) => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
-            () => resolve({ lat: -23.5329, lon: -46.6395 })
+            pos => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
+            err => resolve({ lat: -23.5329, lon: -46.6395 })
         )
     });
 }
@@ -228,7 +228,8 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 async function init(cityData = undefined, cityInfo = undefined) {
     if (cityData == undefined || cityInfo == undefined) {
         const { lat, lon } = await getPosition();
-
+        console.log(lat, lon);
+        
         const res = await fetch(`/search_city?lat=${lat}&lon=${lon}`);
         const cityJson = await res.json();
         cityInfo = cityJson.cities[0];

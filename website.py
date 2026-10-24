@@ -64,7 +64,7 @@ def search_city():
                 "state": city[1],
                 "country": city[2],
                 "latitude": city[3],
-                "longitude": city[4],
+                "longitude": city[4]
             })
     elif lat:
         cur.execute("SELECT cities.name, states.name, country, latitude, longitude FROM cities INNER JOIN states USING(state_id) WHERE latitude = %s AND longitude = %s", (lat, lon))
@@ -72,13 +72,14 @@ def search_city():
         if not response:
             # Get the closest city
             cur.execute(
-                """SELECT name, latitude, longitude,
+                """SELECT cities.name, states.name, country, latitude, longitude,
                         6371 * 2 * ASIN(SQRT(
                             POWER(SIN(RADIANS(latitude - %s) / 2), 2) +
                             COS(RADIANS(%s)) * COS(RADIANS(latitude)) *
                             POWER(SIN(RADIANS(longitude - %s) / 2), 2)
                         )) AS distance_km
-                    FROM cities
+                    FROM cities INNER JOIN states
+                    USING(state_id)
                     ORDER BY distance_km
                     LIMIT 1
                 """, (lat, lat, lon)
@@ -91,7 +92,7 @@ def search_city():
             "state": response[1],
             "country": response[2],
             "latitude": response[3],
-            "longitude": response[4],
+            "longitude": response[4]
         }]
     
     return jsonify({"cities": result})
