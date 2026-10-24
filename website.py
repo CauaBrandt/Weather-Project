@@ -1,18 +1,14 @@
 import psycopg
 from psycopg.types.json import Jsonb
-import pytz
 from flask import Flask, render_template, jsonify, request
 import logging
-from datetime import datetime as dt, date
+import os
 
 app = Flask("__name__")
 
-conn = psycopg.connect(
-    dbname="weather",
-    user="postgres",
-    host="localhost",
-    port="5432"
-)
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+conn = psycopg.connect(DATABASE_URL)
 cur = conn.cursor()
 
 cur.execute("DELETE FROM api_cache WHERE expires_at < NOW()")
@@ -113,4 +109,4 @@ def city():
     conn.commit()
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
