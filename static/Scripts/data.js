@@ -1,3 +1,11 @@
+function element({tag, className = "", id = "", text = "", src = ""}) {
+    const e = document.createElement(tag);
+    e.className = className;
+    e.id = id;
+    e.textContent = text;
+    e.src = src;
+    return e;
+}
 async function getWeatherData(lat, lon) {
     let res = await fetch(`/check_city?lat=${lat}&lon=${lon}`);
     let data = await res.json();
@@ -70,23 +78,13 @@ function iconFor(code) {
 }
 
 function windDirection(deg) {
-    direction = ["S", "SW", "W", "NW", "N", "NE", "E", "SE"];
-    return direction[Math.round(deg % 8)];
+    const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+    return directions[Math.round((deg / 45) % 8)];
 }
 
-let labels = [];
-for (let i = 3, j = 0; j < 7 * 24; j++) {
-    labels.push(`${i}h`);
-    i++;
-    if (i >= 24) {
-        i = 0;
-    }
-}
-
-function drawChart(info, label, color, options) {
+function drawChart(labels, data, label, color, options) {
     const currentChart = Chart.getChart("chart");
     if (currentChart) {
-        if (currentChart.data.datasets[0].label === label) return;
         currentChart.destroy();
     }
 
@@ -96,7 +94,7 @@ function drawChart(info, label, color, options) {
         labels: labels,
         datasets: [{
             label: label,
-            data: info,
+            data: data,
             borderColor: color,
             tension: 0.5
         }]
@@ -104,6 +102,128 @@ function drawChart(info, label, color, options) {
     options: options
     });
 }
+
+function renderHeader(cityInfo) {
+    const city = document.getElementById("city");
+    const dateElement = document.getElementById("date");
+
+    city.textContent = `${cityInfo.name}, ${cityInfo.state}, ${cityInfo.country}`;
+
+    const date = new Date();
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+
+    dateElement.textContent = `${day}.${month}.${year}`;
+}
+
+function renderCurrent(hourlyData, i) {
+    const [icon, condition] = iconFor(hourlyData.weather_code[i])
+    document.getElementById("weather-image").src = `static/Icons/${icon}`
+    document.getElementById("weather-code").textContent = condition;
+
+    const currentTemperature = document.getElementById("temperature");
+    const currentApparentTemperature = document.getElementById("apparent-temperature-button");
+    
+    currentTemperature.innerHTML = "";
+    currentTemperature.appendChild(element({tag: "span", className: "temperature", text: hourlyData.temperature_2m[i]}));
+    currentTemperature.appendChild(element({tag: "span", className: "degree", text:"°C"}));
+
+    currentApparentTemperature.innerHTML = "";
+    currentApparentTemperature.appendChild(element({tag:"span", className:"temperature apparent-temperature-number", text:hourlyData.apparent_temperature[i]}));
+    currentApparentTemperature.appendChild(element({tag:"span", className:"degree apparent-temperature-degree", text:"°C"}));
+
+    const windSpeed = document.getElementById("wind-speed");
+    
+    document.getElementById("humidity").textContent = `Humidity: ${hourlyData.relative_humidity_2m[i]}%`;
+    document.getElementById("precipitation").textContent = `Precipitation: ${hourlyData.precipitation[i]} mm`;
+    document.getElementById("visibility").textContent = `Visibility ${hourlyData.visibility[i] / 1000} Km`;
+    windSpeed.textContent = `Wind Speed: ${hourlyData.wind_speed_10m[i]} km/h `;
+
+    windSpeed.appendChild(element({tag:"span", id:"wind-direction", text:windDirection(hourlyData.wind_direction_10m[i])}));
+}
+
+let currentChart = "temperature";
+function renderChart(hourlyData) {
+    const labels = hourlyData.time.map(h => `${new Date(h).getHours()}h`);
+    const convert = arr => isCelsius ? arr: arr.map(n => invertDegree(n, true));
+
+    document.getElementById("chart-inner").style.width = Math.max(labels.length * 35, 800) + "px";
+
+    const baseOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { ticks: { autoSkip: false } },
+            y: {
+                beginAtZero: true,
+            }
+        }
+    };
+    const tempOptions = {...baseOptions,
+        scales: {...baseOptions.scales, y: { beginAtZero: true, suggestedMax: isCelsius ? 40: 120 }
+    }};
+
+    const charts = [
+       ["temperature", () => convert(hourlyData.temperature_2m), "Temperature (°C)", "red", tempOptions],
+       ["apparent-temperature-button", () => convert(hourlyData.apparent_temperature), "Apparent Temperature (°C)", "pink", tempOptions],
+       ["humidity", () => hourlyData.relative_humidity_2m, "Humidity (%)", "blue", baseOptions],
+       ["visibility", () => hourlyData.visibility.map(n => n / 1000), "Visibility (Km)", "yellow", baseOptions],
+       ["wind-speed", () => hourlyData.wind_speed_10m, "Wind Speed", "gray", baseOptions]
+    ];
+
+    for (const [id, getData, label, color, options] of charts) {
+        document.getElementById(id).onclick = () => {
+            drawChart(labels, getData(), label, color, options);
+            currentChart = id;
+        };
+    }
+
+    const scroller = document.getElementById("chart-scroller");
+    scroller.addEventListener("wheel", (e) => {
+        if (scroller.scrollWidth <= scroller.clientWidth) return;
+
+        e.preventDefault();
+        scroller.scrollLeft += e.deltaY;
+    }, { passive: false });
+    document.getElementById(currentChart).click();
+}
+
+function renderForecast(dailyData) {
+    const forecast = document.getElementById("forecast");
+    forecast.innerHTML = "";
+    for (let i = 0; i < 7; i++) {
+        const dayInfo = element({tag:"div", id:"day-info"});
+        const dayWeather = element({tag:"img", id:"day-weather", src:`static/Icons/${iconFor(dailyData.weather_code[i])[0]}`});
+        const dayTemperatures = element({tag:"div", id:"temperature-max-min"});
+
+        const weekDay = new Date(dailyData.time[i] + "T00:00")
+            .toLocaleDateString("en-US", { weekday: "long" });
+
+        const max = element({tag:"p", id:"max"});
+        const min = element({tag:"p", id:"min"});
+
+        max.append(
+            element({tag:"span", className:"temperature", text:dailyData.temperature_2m_max[i]}),
+            element({tag:"span", className:"degree", text:"°C"})
+        );
+        min.append(
+            element({tag:"span", className:"temperature", text:dailyData.temperature_2m_min[i]}),
+            element({tag:"span", className:"degree", text:"°C"})
+        );
+
+        dayTemperatures.append(element({tag:"p", id:"week-day", text:weekDay}), max, min);
+        dayInfo.append(dayWeather, dayTemperatures);
+        forecast.appendChild(dayInfo);
+    }
+}
+
+const map = L.map('map');
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+}).addTo(map);
 
 async function init(cityData = undefined, cityInfo = undefined) {
     if (cityData == undefined || cityInfo == undefined) {
@@ -115,181 +235,21 @@ async function init(cityData = undefined, cityInfo = undefined) {
         
         const json = await getWeatherData(cityInfo.latitude, cityInfo.longitude);
         cityData = Object.keys(json).length === 1 ? json[0]: json;
-        console.log(cityData);
     }
-
-    // Data
-    const currentData = cityData.current;
-    const dailyData = cityData.daily;
-    const hourlyData = cityData.hourly;
-
-    // daily data
-    const city = document.getElementById("city");
-    const dateElement = document.getElementById("date");
-
-    city.textContent = `${cityInfo.name}, ${cityInfo.state}, ${cityInfo.country}`;
-
-    const date = new Date();
-    const hour = date.getHours();
-    const day = date.getDate();
-    const month = date.getMonth() + 1;
-    const year = date.getFullYear();
-
-    dateElement.textContent = `${day}.${month}.${year}`;
-
-    // Current data
-    const currentIndex = hour > 3 ? hour - 3: 21 + hour;
-
-    const currentIcon = document.getElementById("weather-image");
-    const currentCondition = document.getElementById("weather-code");
-    const currentTemperature = document.getElementById("temperature");
-    const currentApparentTemperature = document.getElementById("apparent-temperature-button");
-
-    const currentCode = iconFor(hourlyData.weather_code[currentIndex])
-    currentIcon.src = `static/Icons/${currentCode[0]}`
-    currentCondition.textContent = `${currentCode[1]}`;
-
-    const temperature = document.createElement("span");
-    temperature.className = "temperature";
-    temperature.textContent = hourlyData.temperature_2m[currentIndex];
+    console.log(cityData);
     
-    const degree = document.createElement("span");
-    degree.className = "degree";
-    degree.textContent = "°C";
+    currentData = cityData.current;
+    dailyData = cityData.daily;
+    hourlyData = cityData.hourly;
 
-    currentTemperature.innerHTML = "";
-    currentTemperature.appendChild(temperature);
-    currentTemperature.appendChild(degree);
+    const currentIndex = Math.max(0, hourlyData.time.indexOf(currentData.time.slice(0, 13) + ":00"));
 
-    const apparentTemperature = document.createElement("span");
-    apparentTemperature.className = "temperature, apparent-temperature-number";
-    apparentTemperature.textContent = hourlyData.apparent_temperature[currentIndex];
+    renderHeader(cityInfo);
+    renderCurrent(hourlyData, currentIndex);
+    renderChart(hourlyData);
+    renderForecast(dailyData);
 
-    const apparentDegree = document.createElement("span");
-    apparentDegree.className = "degree, apparent-temperature-degree";
-    apparentDegree.textContent = "°C";
-
-    currentApparentTemperature.innerHTML = "";
-    currentApparentTemperature.appendChild(apparentTemperature);
-    currentApparentTemperature.appendChild(apparentDegree);
-
-    // Chart
-    const humidityButton = document.getElementById("humidity");
-    const precipitationButton = document.getElementById("precipitation");
-    const visibilityButton = document.getElementById("visibility");
-    const windSpeedButton = document.getElementById("wind-speed");
-    
-    humidityButton.textContent = `Humidity: ${hourlyData.relative_humidity_2m[currentIndex]}%`;
-    precipitationButton.textContent = `Precipitation: ${hourlyData.precipitation[currentIndex]} mm`;
-    visibilityButton.textContent = `Visibility ${hourlyData.visibility[currentIndex] / 1000} Km`;
-    windSpeedButton.textContent = `Wind Speed: ${hourlyData.wind_speed_10m[currentIndex]} km/h `;
-    
-    const windDirectionSpan = document.createElement("span");
-    windDirectionSpan.id = "wind-direction";
-    windDirectionSpan.textContent = windDirection(hourlyData.wind_direction_10m[currentIndex]);
-
-    windSpeedButton.appendChild(windDirectionSpan);
-
-    const scroller = document.getElementById("chart-scroller");
-    const chartInner = document.getElementById("chart-inner");
-
-    chartInner.style.width = Math.max(labels.length * 40, 800) + "px";
-
-    const options = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-            x: { ticks: { autoSkip: false } },
-            y: {
-                beginAtZero: true,
-            }
-        }
-    };
-    const temperatureOptions = JSON.parse(JSON.stringify(options));
-    temperatureOptions.scales.y.suggestedMax = isCelsius ? 40: 120;
-
-    drawChart(hourlyData.temperature_2m, "Temperature (°C)", "red", temperatureOptions)
-    currentTemperature.addEventListener("click", () => {
-        const info = isCelsius ? hourlyData.temperature_2m: hourlyData.temperature_2m.map(f => invertDegree(f, true));
-        temperatureOptions.scales.y.suggestedMax = isCelsius ? 40: 120;
-        drawChart(info, "Temperature (°C)", "red", temperatureOptions);
-    });
-    currentApparentTemperature.addEventListener("click", () => {
-        const info = isCelsius ? hourlyData.apparent_temperature: hourlyData.apparent_temperature.map(f => invertDegree(f, true));
-        temperatureOptions.scales.y.suggestedMax = isCelsius ? 40: 120;
-        drawChart(info, "Apparent Temperature (°C)", "pink", temperatureOptions);
-    });
-    humidityButton.addEventListener("click", () => {
-        drawChart(hourlyData.relative_humidity_2m, "Humidity (%)", "darkblue", options);
-    });
-    visibilityButton.addEventListener("click", () => {
-        drawChart(hourlyData.visibility.map(v => v / 1000), "Visibility (Km)", "yellow", options);
-    });
-    windSpeedButton.addEventListener("click", () => {
-        drawChart(hourlyData.wind_speed_10m, "Wind Speed (Km)", "gray", options);
-    });
-
-    scroller.addEventListener("wheel", (e) => {
-        if (scroller.width <= scroller.clientWidth) return;
-
-        e.preventDefault();
-        scroller.scrollLeft += e.deltaY;
-    }, { passive: false });
-
-    // Forecast
-    const forecast = document.getElementById("forecast");
-    forecast.innerHTML = "";
-    for (let i = 0; i < 7; i++) {
-        const dayInfo = document.createElement("div");
-        dayInfo.id = "day-info";
-
-        const dayWeather = document.createElement("img");
-        dayWeather.id = "day-weather";
-        dayWeather.src = `static/Icons/${iconFor(dailyData.weather_code[i])[0]}`
-        
-        const dayTemperatures = document.createElement("div");
-        dayTemperatures.id = "temperature-max-min";
-
-        const date = new Date(dailyData.time[i] + "T00:00");
-        const weekDay = document.createElement("p");
-        weekDay.id = "week-day";
-        weekDay.textContent = date.toLocaleDateString("en-US", { weekday: "long" });
-
-        const dayMax = document.createElement("p");
-        const dayMin = document.createElement("p");
-        dayMax.id = "max";
-        dayMin.id = "min";
-
-        const max = document.createElement("span");
-        const min = document.createElement("span");
-        max.className = min.className = "temperature";
-
-        max.textContent = dailyData.temperature_2m_max[i];
-        min.textContent = dailyData.temperature_2m_min[i];
-
-        dayMax.appendChild(max);
-        dayMax.appendChild(degree.cloneNode(true));
-        dayMin.appendChild(min);
-        dayMin.appendChild(degree.cloneNode(true));
-
-        dayTemperatures.appendChild(weekDay);
-        dayTemperatures.appendChild(dayMax);
-        dayTemperatures.appendChild(dayMin);
-
-        dayInfo.appendChild(dayWeather);
-        dayInfo.appendChild(dayTemperatures);
-
-        forecast.appendChild(dayInfo);
-    }
-    
-    // Map
-    const map = L.map('map').setView([cityData.latitude, cityData.longitude], 13);
-
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }).addTo(map);
+    map.setView([cityData.latitude, cityData.longitude], 13);
 }
 
 init()
