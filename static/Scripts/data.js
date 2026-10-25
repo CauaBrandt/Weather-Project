@@ -10,7 +10,6 @@ async function getWeatherData(lat, lon) {
     let res = await fetch(`/check_city?lat=${lat}&lon=${lon}`);
     let data = await res.json();
     if (data != null) {
-        console.log("Requested from Database!");
         return data;
     }
 
@@ -34,7 +33,6 @@ async function getWeatherData(lat, lon) {
     data.hourly.temperature_2m = data.hourly.temperature_2m.map(n => Math.round(n));
     data.hourly.apparent_temperature = data.hourly.apparent_temperature.map(n => Math.round(n));
 
-    console.log("Requested from API!");
     await fetch("/city", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -141,7 +139,11 @@ function renderCurrent(hourlyData, i) {
     document.getElementById("visibility").textContent = `Visibility ${hourlyData.visibility[i] / 1000} Km`;
     windSpeed.textContent = `Wind Speed: ${hourlyData.wind_speed_10m[i]} km/h `;
 
-    windSpeed.appendChild(element({tag:"span", id:"wind-direction", text:windDirection(hourlyData.wind_direction_10m[i])}));
+    windSpeed.append(
+        element({tag:"span", id:"wind-direction", text:windDirection(hourlyData.wind_direction_10m[i])}),
+        element({tag:"span", id:"wind-dir-arrow", text:" --> "})
+    );
+    document.getElementById("wind-dir-arrow").style.transform = `rotate(${hourlyData.wind_direction_10m[i] + 90}deg)`;
 }
 
 let currentChart = "temperature";
@@ -170,7 +172,8 @@ function renderChart(hourlyData) {
        ["temperature", () => convert(hourlyData.temperature_2m), "Temperature (°C)", "red", tempOptions],
        ["apparent-temperature-button", () => convert(hourlyData.apparent_temperature), "Apparent Temperature (°C)", "pink", tempOptions],
        ["humidity", () => hourlyData.relative_humidity_2m, "Humidity (%)", "blue", baseOptions],
-       ["visibility", () => hourlyData.visibility.map(n => n / 1000), "Visibility (Km)", "yellow", baseOptions],
+       ["precipitation", () => hourlyData.precipitation, "Precipitation (mm)", "lightblue", baseOptions],
+       ["visibility", () => hourlyData.visibility.map(n => n / 1000), "Visibility (Km)", "black", baseOptions],
        ["wind-speed", () => hourlyData.wind_speed_10m, "Wind Speed", "gray", baseOptions]
     ];
 
@@ -237,7 +240,6 @@ async function init(cityData = undefined, cityInfo = undefined) {
         const json = await getWeatherData(cityInfo.latitude, cityInfo.longitude);
         cityData = Object.keys(json).length === 1 ? json[0]: json;
     }
-    console.log(cityData);
     
     currentData = cityData.current;
     dailyData = cityData.daily;

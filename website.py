@@ -110,7 +110,6 @@ def city():
             Jsonb(data),
         )
     )
-    print("Inserted to database!")
     conn.commit()
 
 if __name__ == "__main__":
