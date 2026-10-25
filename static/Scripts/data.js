@@ -85,6 +85,7 @@ function windDirection(deg) {
 function drawChart(labels, data, label, color, options) {
     const currentChart = Chart.getChart("chart");
     if (currentChart) {
+        if (data == currentChart.data.datasets[0].data) return;
         currentChart.destroy();
     }
 
@@ -157,7 +158,7 @@ function renderChart(hourlyData) {
         scales: {
             x: { ticks: { autoSkip: false } },
             y: {
-                beginAtZero: true,
+                beginAtZero: true
             }
         }
     };
@@ -228,7 +229,6 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 async function init(cityData = undefined, cityInfo = undefined) {
     if (cityData == undefined || cityInfo == undefined) {
         const { lat, lon } = await getPosition();
-        console.log(lat, lon);
         
         const res = await fetch(`/search_city?lat=${lat}&lon=${lon}`);
         const cityJson = await res.json();
