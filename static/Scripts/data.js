@@ -155,13 +155,17 @@ function renderCurrent(hourlyData, i) {
 }
 
 let currentChart = "temperature";
+function sizeChart(length, points) {
+    const scroller = document.getElementById("chart-scroller");
+    // Resize the chart to show the amount of points
+    document.getElementById("chart-inner").style.width = Math.max(length * (scroller.clientWidth / points), scroller.clientWidth) + "px";
+}
 function renderChart(hourlyData) {
     const labels = hourlyData.time.map(h => `${new Date(h).getHours()}h`);
     const convert = arr => isCelsius ? arr: arr.map(n => invertDegree(n, true));
     const scroller = document.getElementById("chart-scroller");
-    const inner = document.getElementById("chart-inner");
-
-    inner.style.width = Math.max(labels.length * 35, 800) + "px";
+    
+    sizeChart(labels.length, 25);
 
     const baseOptions = {
         responsive: true,
@@ -266,3 +270,7 @@ async function init(cityData = undefined, cityInfo = undefined) {
 }
 
 init()
+
+window.addEventListener("resize", () => {
+    sizeChart(hourlyData.temperature_2m.length, 25)
+});
