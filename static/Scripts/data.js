@@ -75,6 +75,13 @@ function iconFor(code) {
     return ["Cloud.svg", "Cloudy"];
 }
 
+function uvCondition(index) {
+    if (index < 3) return "Low";
+    if (index < 6) return "Moderate";
+    if (index < 8) return "high";
+    if (index < 11) return "Very high";
+    return "Extreme";
+}
 function windDirection(deg) {
     const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
     return directions[Math.round((deg / 45) % 8)];
@@ -134,6 +141,7 @@ function renderCurrent(hourlyData, i) {
 
     const windSpeed = document.getElementById("wind-speed");
     
+    document.getElementById("uv-index").textContent = `UV Index: ${uvCondition(hourlyData.uv_index[i])}`;
     document.getElementById("humidity").textContent = `Humidity: ${hourlyData.relative_humidity_2m[i]}%`;
     document.getElementById("precipitation").textContent = `Precipitation: ${hourlyData.precipitation[i]} mm`;
     document.getElementById("visibility").textContent = `Visibility ${hourlyData.visibility[i] / 1000} Km`;
@@ -150,8 +158,10 @@ let currentChart = "temperature";
 function renderChart(hourlyData) {
     const labels = hourlyData.time.map(h => `${new Date(h).getHours()}h`);
     const convert = arr => isCelsius ? arr: arr.map(n => invertDegree(n, true));
+    const scroller = document.getElementById("chart-scroller");
+    const inner = document.getElementById("chart-inner");
 
-    document.getElementById("chart-inner").style.width = Math.max(labels.length * 35, 800) + "px";
+    inner.style.width = Math.max(labels.length * 35, 800) + "px";
 
     const baseOptions = {
         responsive: true,
@@ -169,11 +179,12 @@ function renderChart(hourlyData) {
     }};
 
     const charts = [
+       ["uv-index", () => hourlyData.uv_index, "UV Index", "purple", baseOptions],
        ["temperature", () => convert(hourlyData.temperature_2m), "Temperature (°C)", "red", tempOptions],
        ["apparent-temperature-button", () => convert(hourlyData.apparent_temperature), "Apparent Temperature (°C)", "pink", tempOptions],
-       ["humidity", () => hourlyData.relative_humidity_2m, "Humidity (%)", "blue", baseOptions],
+       ["humidity", () => hourlyData.relative_humidity_2m, "Humidity (%)", "rgb(35, 130, 220)", baseOptions],
        ["precipitation", () => hourlyData.precipitation, "Precipitation (mm)", "lightblue", baseOptions],
-       ["visibility", () => hourlyData.visibility.map(n => n / 1000), "Visibility (Km)", "black", baseOptions],
+       ["visibility", () => hourlyData.visibility.map(n => n / 1000), "Visibility (Km)", "rgba(100,100,100,0.2)", baseOptions],
        ["wind-speed", () => hourlyData.wind_speed_10m, "Wind Speed", "gray", baseOptions]
     ];
 
@@ -184,7 +195,6 @@ function renderChart(hourlyData) {
         };
     }
 
-    const scroller = document.getElementById("chart-scroller");
     scroller.addEventListener("wheel", (e) => {
         if (scroller.scrollWidth <= scroller.clientWidth) return;
 
