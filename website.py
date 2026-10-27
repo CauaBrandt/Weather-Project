@@ -47,7 +47,6 @@ def search_city():
     lat = request.args.get("lat", type=float)
     lon = request.args.get("lon", type=float)
 
-
     if query:
         cur.execute("SELECT cities.name, states.name, country, latitude, longitude FROM cities INNER JOIN states USING(state_id) WHERE unaccent(cities.name) ILIKE unaccent(%s) LIMIT %s", (f"{query}%", max_search,))
         response = cur.fetchall()
@@ -98,6 +97,9 @@ def search_city():
             "latitude": response[3],
             "longitude": response[4]
         }]
+
+    cur.execute("DELETE FROM api_cache WHERE expires_at < NOW()")
+    conn.commit()
     
     return jsonify({"cities": result})
 
