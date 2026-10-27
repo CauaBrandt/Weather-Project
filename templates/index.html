@@ -45,9 +45,25 @@
                 <p id="date"></p>
             </div>
             <div id="daily-info">
-                <img id="weather-image" src="">
+                <img id="weather-image">
                 <div id="daily-weather-info">
-                    <p id="weather-code"></p>
+                    <div id="sun-rise-set">
+                        <p id="weather-condition"></p>
+                        <div class="suntime">
+                            <img src="{{ url_for('static', filename='Icons/Sunrise.svg') }}">
+                            <div>                                
+                                <p class="sunhour">Sunrise</p>
+                                <p id="sunrise"></p>
+                            </div>
+                        </div>
+                        <div class="suntime" >
+                            <img src="{{ url_for('static', filename='Icons/Sunset.svg') }}">
+                            <div>                                
+                                <p class="sunhour">Sunset</p>
+                                <p id="sunset"></p>
+                            </div>
+                        </div>
+                    </div>
                     <div id="temperature-container">
                         <button id="temperature"></button>
                         <p id="apparent-temperature">Feels like</p>

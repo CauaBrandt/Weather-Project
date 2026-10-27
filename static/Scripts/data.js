@@ -16,7 +16,7 @@ async function getWeatherData(lat, lon) {
     const url = "https://api.open-meteo.com/v1/forecast"
     + `?latitude=${lat}&longitude=${lon}`
     + "&current=is_day"
-    + "&daily=weather_code,temperature_2m_max,temperature_2m_min"
+    + "&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset"
     + "&hourly=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,"
     + "visibility,wind_speed_10m,wind_direction_10m,uv_index"
     + "&timezone=auto";
@@ -32,6 +32,7 @@ async function getWeatherData(lat, lon) {
 
     data.hourly.temperature_2m = data.hourly.temperature_2m.map(n => Math.round(n));
     data.hourly.apparent_temperature = data.hourly.apparent_temperature.map(n => Math.round(n));
+    console.log(data);
 
     await fetch("/city", {
         method: "POST",
@@ -123,10 +124,10 @@ function renderHeader(cityInfo) {
     dateElement.textContent = `${day}.${month}.${year}`;
 }
 
-function renderCurrent(hourlyData, i) {
+function renderCurrent(hourlyData, i, dailyData) {
     const [icon, condition] = iconFor(hourlyData.weather_code[i])
     document.getElementById("weather-image").src = `static/Icons/${icon}`
-    document.getElementById("weather-code").textContent = condition;
+    document.getElementById("weather-condition").textContent = condition;
 
     const currentTemperature = document.getElementById("temperature");
     const currentApparentTemperature = document.getElementById("apparent-temperature-button");
@@ -152,6 +153,9 @@ function renderCurrent(hourlyData, i) {
         element({tag:"span", id:"wind-dir-arrow", text:" --> "})
     );
     document.getElementById("wind-dir-arrow").style.transform = `rotate(${hourlyData.wind_direction_10m[i] + 90}deg)`;
+
+    document.getElementById("sunrise").textContent = dailyData.sunrise[0].slice(-5);
+    document.getElementById("sunset").textContent = dailyData.sunset[0].slice(-5);
 }
 
 let currentChart = "temperature";
@@ -262,7 +266,7 @@ async function init(cityData = undefined, cityInfo = undefined) {
     const currentIndex = Math.max(0, hourlyData.time.indexOf(currentData.time.slice(0, 13) + ":00"));
 
     renderHeader(cityInfo);
-    renderCurrent(hourlyData, currentIndex);
+    renderCurrent(hourlyData, currentIndex, dailyData);
     renderChart(hourlyData);
     renderForecast(dailyData);
 

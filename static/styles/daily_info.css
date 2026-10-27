@@ -21,11 +21,41 @@
     display: flex;
     flex-direction: column;
 }
-#weather-code {
+#sun-rise-set {
+    display: flex;
+}
+#weather-condition {
     font-size: 25px;
     font-weight: 700;
 
     padding: 15px 0 15px 10px;
+}
+.suntime {
+    display: flex;
+    align-items: center;
+    margin-left: 40px;
+}
+.suntime img {
+    width: 60px;
+}
+.suntime div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    vertical-align: end;
+    height: 60px;
+    margin-left: 10px;
+}
+.sunhour,
+#sunrise,
+#sunset {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 500;
+}
+.sunhour {
+    font-size: 18px;
+    padding-top: 10px;
 }
 #temperature-container {
     display: flex;
