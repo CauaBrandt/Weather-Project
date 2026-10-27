@@ -43,18 +43,18 @@ def check_city():
 def search_city():
     max_search = 8
     result = []
-    query = request.args.get("q", "").strip().lower()
+    query = request.args.get("q", "")
     lat = request.args.get("lat", type=float)
     lon = request.args.get("lon", type=float)
 
 
     if query:
-        cur.execute("SELECT cities.name, states.name, country, latitude, longitude FROM cities INNER JOIN states USING(state_id) WHERE LOWER(cities.name) LIKE %s LIMIT %s", (f"{query}%", max_search,))
+        cur.execute("SELECT cities.name, states.name, country, latitude, longitude FROM cities INNER JOIN states USING(state_id) WHERE unaccent(cities.name) ILIKE unaccent(%s) LIMIT %s", (f"{query}%", max_search,))
         response = cur.fetchall()
 
         if len(response) < max_search:
             complement = max_search - len(response)
-            cur.execute("SELECT cities.name, states.name, country, latitude, longitude FROM cities INNER JOIN states USING(state_id) WHERE LOWER(cities.name) LIKE %s LIMIT %s", (f"%{query}%", complement,))
+            cur.execute("SELECT cities.name, states.name, country, latitude, longitude FROM cities INNER JOIN states USING(state_id) WHERE unaccent(cities.name) ILIKE unaccent(%s) LIMIT %s", (f"%{query}%", complement,))
             for city in cur.fetchall():
                 if not city in response:
                     response.append(city)
