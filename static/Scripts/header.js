@@ -21,12 +21,12 @@ searchBar.addEventListener("input", () => {
         const response = await fetch("/search_city?q=" + encodeURIComponent(query));
         const data = await response.json();
         
-        if (!data.cities.length) {
+        if (data.error) {
+            cityList.appendChild(element({tag:"li", text:`${data.error}`}));
             return;
         }
         data.cities.forEach(city => {
-            const cityButton = document.createElement("li");
-            cityButton.textContent = `${city.name}, ${city.state}`
+            const cityButton = element({tag:"li", text:`${city.name}, ${city.state}`});
             cityButton.addEventListener("click", async () => {
                 const json = await getWeatherData(city.latitude, city.longitude);
                 const cityData = Object.keys(json).length === 1 ? json[0]: json;

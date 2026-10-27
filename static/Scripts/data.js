@@ -32,7 +32,6 @@ async function getWeatherData(lat, lon) {
 
     data.hourly.temperature_2m = data.hourly.temperature_2m.map(n => Math.round(n));
     data.hourly.apparent_temperature = data.hourly.apparent_temperature.map(n => Math.round(n));
-    console.log(data);
 
     await fetch("/city", {
         method: "POST",

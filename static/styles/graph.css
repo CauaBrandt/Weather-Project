@@ -1,11 +1,10 @@
 #chart-container {
     position: relative;
-    background-color: white;
-    border-radius: 20px;
-    
     margin-bottom: 50px;
 }
 #chart-scroller {
+    background-color: white;
+    border-radius: 20px;
     overflow-x: auto;
     overflow-y: hidden;
     scrollbar-width: none;

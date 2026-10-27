@@ -58,7 +58,10 @@ def search_city():
             for city in cur.fetchall():
                 if not city in response:
                     response.append(city)
-
+        
+        if not response:
+            return jsonify({ "error": "Couldn't find a city!"})
+        
         for city in response:
             result.append({
                 "name": city[0],
@@ -87,7 +90,7 @@ def search_city():
             )
 
             response = cur.fetchone()
-        
+
         result = [{
             "name": response[0],
             "state": response[1],
