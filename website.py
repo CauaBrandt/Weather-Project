@@ -8,12 +8,7 @@ app = Flask("__name__")
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
-conn = psycopg.connect(
-    dbname="weather",
-    user="postgres",
-    host="localhost",
-    port="5432"
-)
+conn = psycopg.connect(DATABASE_URL)
 cur = conn.cursor()
 
 cur.execute("DELETE FROM api_cache WHERE expires_at < NOW()")
@@ -116,4 +111,4 @@ def city():
     conn.commit()
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
