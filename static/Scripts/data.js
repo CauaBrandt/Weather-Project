@@ -184,16 +184,20 @@ function renderChart(hourlyData) {
 
     const charts = [
        ["uv-index", () => hourlyData.uv_index, t("uvIndex"), "purple", baseOptions],
-       ["temperature", () => convert(hourlyData.temperature_2m), `${t("temperature")} (${symbol})`, "red", tempOptions],
-       ["apparent-temperature-button", () => convert(hourlyData.apparent_temperature), `${t("chartApparent")} (${symbol})`, "pink", tempOptions],
+       ["temperature", () => convert(hourlyData.temperature_2m), `${t("temperature")}`, "red", tempOptions],
+       ["apparent-temperature-button", () => convert(hourlyData.apparent_temperature), `${t("chartApparent")}`, "pink", tempOptions],
        ["humidity", () => hourlyData.relative_humidity_2m, t("chartHumidity"), "rgb(35, 130, 220)", baseOptions],
        ["precipitation", () => hourlyData.precipitation, t("chartPrecipitation"), "lightblue", baseOptions],
        ["visibility", () => hourlyData.visibility.map(n => n / 1000), t("chartVisibility"), "rgba(100,100,100,0.2)", baseOptions],
        ["wind-speed", () => hourlyData.wind_speed_10m, t("windSpeed"), "gray", baseOptions]
     ];
 
-    for (const [id, getData, label, color, options] of charts) {
+    for (let [id, getData, label, color, options] of charts) {
         document.getElementById(id).onclick = () => {
+            if (label.includes(t("temperature"))) {
+                label = label.includes(t("apparent")) ? t("apparent"): t("temperature");
+                label += ` (${symbol})`;
+            }
             drawChart(labels, getData(), label, color, options);
             currentChart = id;
         };
