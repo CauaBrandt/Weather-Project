@@ -1,0 +1,45 @@
+{
+  "locale": "de-DE",
+  "pageTitle": "Wetter",
+  "search": "Suchen",
+  "currentWeather": "Aktuelles Wetter",
+  "sunrise": "Sonnenaufgang",
+  "sunset": "Sonnenuntergang",
+  "feelsLike": "Gefühlt",
+  "uvIndex": "UV-Index",
+  "humidity": "Luftfeuchtigkeit",
+  "precipitation": "Niederschlag",
+  "visibility": "Sichtweite",
+  "windSpeed": "Windgeschwindigkeit",
+
+  "condSunny": "Sonnig",
+  "condPartlyCloudy": "Teilweise bewölkt",
+  "condCloudy": "Bewölkt",
+  "condFoggy": "Nebel",
+  "condRain": "Regen",
+  "condSnow": "Schneefall",
+  "condThunderstorm": "Gewitter",
+
+  "temperature": "Temperatur",
+  "apparent": "Gefühlte",
+
+  "uvLow": "Niedrig",
+  "uvModerate": "Mäßig",
+  "uvHigh": "Hoch",
+  "uvVeryHigh": "Sehr hoch",
+  "uvExtreme": "Extrem",
+
+  "windN": "N",
+  "windNE": "NO",
+  "windE": "O",
+  "windSE": "SO",
+  "windS": "S",
+  "windSW": "SW",
+  "windW": "W",
+  "windNW": "NW",
+
+  "chartApparent": "Gefühlte Temperatur",
+  "chartHumidity": "Luftfeuchtigkeit (%)",
+  "chartPrecipitation": "Niederschlag (mm)",
+  "chartVisibility": "Sichtweite (Km)"
+}

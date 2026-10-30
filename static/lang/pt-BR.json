@@ -1,0 +1,45 @@
+{
+  "locale": "pt-BR",
+  "pageTitle": "Clima",
+  "search": "Pesquisar",
+  "currentWeather": "Clima atual",
+  "sunrise": "Nascer do sol",
+  "sunset": "Pôr do sol",
+  "feelsLike": "Sensação térmica",
+  "uvIndex": "Índice UV",
+  "humidity": "Umidade",
+  "precipitation": "Precipitação",
+  "visibility": "Visibilidade",
+  "windSpeed": "Velocidade do vento",
+
+  "condSunny": "Ensolarado",
+  "condPartlyCloudy": "Parcialmente nublado",
+  "condCloudy": "Nublado",
+  "condFoggy": "Neblina",
+  "condRain": "Chuva",
+  "condSnow": "Neve",
+  "condThunderstorm": "Tempestade",
+
+  "temperature": "Temperatura",
+  "apparent": "Sensação",
+
+  "uvLow": "Baixo",
+  "uvModerate": "Moderado",
+  "uvHigh": "Alto",
+  "uvVeryHigh": "Muito alto",
+  "uvExtreme": "Extremo",
+
+  "windN": "N",
+  "windNE": "NE",
+  "windE": "L",
+  "windSE": "SE",
+  "windS": "S",
+  "windSW": "SO",
+  "windW": "O",
+  "windNW": "NO",
+
+  "chartApparent": "Sensação térmica",
+  "chartHumidity": "Umidade (%)",
+  "chartPrecipitation": "Precipitação (mm)",
+  "chartVisibility": "Visibilidade (Km)"
+}

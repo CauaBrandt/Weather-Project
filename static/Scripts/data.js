@@ -59,32 +59,32 @@ function getPosition() {
 
 function iconFor(code) {
     if (code == 0)
-        return ["Sun.svg", "Sunny"];
+        return ["Sun.svg", "condSunny"];
     if ([1, 2].includes(code))
-        return ["PartlyCloudy.svg", "Partly Cloudy"];
+        return ["PartlyCloudy.svg", "condPartlyCloudy"];
     if (code == 3)
-        return ["Cloud.svg", "Cloudy"];
+        return ["Cloud.svg", "condCloudy"];
     if ([45, 48].includes(code))
-        return ["Fog.svg", "Foggy"];
+        return ["Fog.svg", "condFoggy"];
     if ((code >= 51 && code <= 67) || [80, 81, 82].includes(code))
-        return ["RainCloud.svg", "Rain"];
+        return ["RainCloud.svg", "condRain"];
     if ((code >= 71 && code <= 77) || [85, 86].includes(code))
-        return ["Snow.svg", "Snowing"];
+        return ["Snow.svg", "condSnow"];
     if ([95, 96, 99].includes(code))
-        return ["ThunderCloud.svg", "Thunderstorm"];
-    return ["Cloud.svg", "Cloudy"];
+        return ["ThunderCloud.svg", "condThunderstorm"];
+    return ["Cloud.svg", "condCloudy"];
 }
 
 function uvCondition(index) {
-    if (index < 3) return "Low";
-    if (index < 6) return "Moderate";
-    if (index < 8) return "high";
-    if (index < 11) return "Very high";
-    return "Extreme";
+    if (index < 3) return "uvLow";
+    if (index < 6) return "uvModerate";
+    if (index < 8) return "uvHigh";
+    if (index < 11) return "uvVeryHigh";
+    return "uvExtreme";
 }
 function windDirection(deg) {
-    const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
-    return directions[Math.round((deg / 45) % 8)];
+    const directions = ["windN", "windNE", "windE", "windSE", "windS", "windSW", "windW", "windNW"];
+    return t(directions[Math.round(deg / 45) % 8]);
 }
 
 function drawChart(labels, data, label, color, options) {
@@ -109,24 +109,21 @@ function drawChart(labels, data, label, color, options) {
     });
 }
 
+let lastCityInfo, lastIndex;
+
 function renderHeader(cityInfo) {
     const city = document.getElementById("city");
     const dateElement = document.getElementById("date");
 
     city.textContent = `${cityInfo.name}, ${cityInfo.state}, ${cityInfo.country}`;
 
-    const date = new Date();
-    const day = date.getDate();
-    const month = date.getMonth() + 1;
-    const year = date.getFullYear();
-
-    dateElement.textContent = `${day}.${month}.${year}`;
+    dateElement.textContent = new Date().toLocaleDateString(t("locale"));
 }
 
 function renderCurrent(hourlyData, i, dailyData) {
     const [icon, condition] = iconFor(hourlyData.weather_code[i])
     document.getElementById("weather-image").src = `static/Icons/${icon}`
-    document.getElementById("weather-condition").textContent = condition;
+    document.getElementById("weather-condition").textContent = t(condition);
 
     const currentTemperature = document.getElementById("temperature");
     const currentApparentTemperature = document.getElementById("apparent-temperature-button");
@@ -141,11 +138,11 @@ function renderCurrent(hourlyData, i, dailyData) {
 
     const windSpeed = document.getElementById("wind-speed");
     
-    document.getElementById("uv-index").textContent = `UV Index: ${uvCondition(hourlyData.uv_index[i])}`;
-    document.getElementById("humidity").textContent = `Humidity: ${hourlyData.relative_humidity_2m[i]}%`;
-    document.getElementById("precipitation").textContent = `Precipitation: ${hourlyData.precipitation[i]} mm`;
-    document.getElementById("visibility").textContent = `Visibility ${hourlyData.visibility[i] / 1000} Km`;
-    windSpeed.textContent = `Wind Speed: ${hourlyData.wind_speed_10m[i]} km/h `;
+    document.getElementById("uv-index").textContent = `${t("uvIndex")}: ${t(uvCondition(hourlyData.uv_index[i]))}`;
+    document.getElementById("humidity").textContent = `${t("humidity")}: ${hourlyData.relative_humidity_2m[i]}%`;
+    document.getElementById("precipitation").textContent = `${t("precipitation")}: ${hourlyData.precipitation[i]} mm`;
+    document.getElementById("visibility").textContent = `${t("visibility")}: ${hourlyData.visibility[i] / 1000} Km`;
+    windSpeed.textContent = `${t("windSpeed")}: ${hourlyData.wind_speed_10m[i]} km/h `;
 
     windSpeed.append(
         element({tag:"span", id:"wind-direction", text:windDirection(hourlyData.wind_direction_10m[i])}),
@@ -186,28 +183,35 @@ function renderChart(hourlyData) {
     }};
 
     const charts = [
-       ["uv-index", () => hourlyData.uv_index, "UV Index", "purple", baseOptions],
-       ["temperature", () => convert(hourlyData.temperature_2m), "Temperature (°C)", "red", tempOptions],
-       ["apparent-temperature-button", () => convert(hourlyData.apparent_temperature), "Apparent Temperature (°C)", "pink", tempOptions],
-       ["humidity", () => hourlyData.relative_humidity_2m, "Humidity (%)", "rgb(35, 130, 220)", baseOptions],
-       ["precipitation", () => hourlyData.precipitation, "Precipitation (mm)", "lightblue", baseOptions],
-       ["visibility", () => hourlyData.visibility.map(n => n / 1000), "Visibility (Km)", "rgba(100,100,100,0.2)", baseOptions],
-       ["wind-speed", () => hourlyData.wind_speed_10m, "Wind Speed", "gray", baseOptions]
+       ["uv-index", () => hourlyData.uv_index, t("uvIndex"), "purple", baseOptions],
+       ["temperature", () => convert(hourlyData.temperature_2m), `${t("temperature")}`, "red", tempOptions],
+       ["apparent-temperature-button", () => convert(hourlyData.apparent_temperature), `${t("chartApparent")}`, "pink", tempOptions],
+       ["humidity", () => hourlyData.relative_humidity_2m, t("chartHumidity"), "rgb(35, 130, 220)", baseOptions],
+       ["precipitation", () => hourlyData.precipitation, t("chartPrecipitation"), "lightblue", baseOptions],
+       ["visibility", () => hourlyData.visibility.map(n => n / 1000), t("chartVisibility"), "rgba(100,100,100,0.2)", baseOptions],
+       ["wind-speed", () => hourlyData.wind_speed_10m, t("windSpeed"), "gray", baseOptions]
     ];
 
-    for (const [id, getData, label, color, options] of charts) {
+    for (let [id, getData, label, color, options] of charts) {
         document.getElementById(id).onclick = () => {
+            if (label.includes(t("temperature"))) {
+                label = label.includes(t("apparent")) ? t("apparent"): t("temperature");
+                label += ` (${symbol})`;
+            }
             drawChart(labels, getData(), label, color, options);
             currentChart = id;
         };
     }
 
-    scroller.addEventListener("wheel", (e) => {
-        if (scroller.scrollWidth <= scroller.clientWidth) return;
+    if (!scroller.dataset.wheelBound) {
+        scroller.dataset.wheelBound = "1";
+        scroller.addEventListener("wheel", (e) => {
+            if (scroller.scrollWidth <= scroller.clientWidth) return;
 
-        e.preventDefault();
-        scroller.scrollLeft += e.deltaY;
-    }, { passive: false });
+            e.preventDefault();
+            scroller.scrollLeft += e.deltaY;
+        }, { passive: false });
+    }
     document.getElementById(currentChart).click();
 }
 
@@ -220,7 +224,7 @@ function renderForecast(dailyData) {
         const dayTemperatures = element({tag:"div", id:"temperature-max-min"});
 
         const weekDay = new Date(dailyData.time[i] + "T00:00")
-            .toLocaleDateString("en-US", { weekday: "long" });
+            .toLocaleDateString(t("locale"), { weekday: "long" });
 
         const max = element({tag:"p", id:"max"});
         const min = element({tag:"p", id:"min"});
@@ -247,6 +251,8 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 async function init(cityData = undefined, cityInfo = undefined) {
+    await i18nReady;
+
     if (cityData == undefined || cityInfo == undefined) {
         const { lat, lon } = await getPosition();
         
@@ -264,6 +270,9 @@ async function init(cityData = undefined, cityInfo = undefined) {
 
     const currentIndex = Math.max(0, hourlyData.time.indexOf(currentData.time.slice(0, 13) + ":00"));
 
+    lastCityInfo = cityInfo;
+    lastIndex = currentIndex;
+
     renderHeader(cityInfo);
     renderCurrent(hourlyData, currentIndex, dailyData);
     renderChart(hourlyData);
@@ -276,4 +285,14 @@ init()
 
 window.addEventListener("resize", () => {
     sizeChart(hourlyData.temperature_2m.length, 25)
+});
+
+// Re-draw all translated text when the user switches language
+document.addEventListener("i18n:changed", () => {
+    if (lastCityInfo === undefined) return;
+    Chart.getChart("chart")?.destroy();
+    renderHeader(lastCityInfo);
+    renderCurrent(hourlyData, lastIndex, dailyData);
+    renderChart(hourlyData);
+    renderForecast(dailyData);
 });
