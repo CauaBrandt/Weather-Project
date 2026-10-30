@@ -1,0 +1,45 @@
+{
+  "locale": "en-GB",
+  "pageTitle": "Weather",
+  "search": "Search",
+  "currentWeather": "Current weather",
+  "sunrise": "Sunrise",
+  "sunset": "Sunset",
+  "feelsLike": "Feels like",
+  "uvIndex": "UV Index",
+  "humidity": "Humidity",
+  "precipitation": "Precipitation",
+  "visibility": "Visibility",
+  "windSpeed": "Wind Speed",
+
+  "condSunny": "Sunny",
+  "condPartlyCloudy": "Partly Cloudy",
+  "condCloudy": "Cloudy",
+  "condFoggy": "Foggy",
+  "condRain": "Rain",
+  "condSnow": "Snowing",
+  "condThunderstorm": "Thunderstorm",
+
+  "temperature": "Temperature",
+  "apparent": "Apparent",
+
+  "uvLow": "Low",
+  "uvModerate": "Moderate",
+  "uvHigh": "High",
+  "uvVeryHigh": "Very high",
+  "uvExtreme": "Extreme",
+
+  "windN": "N",
+  "windNE": "NE",
+  "windE": "E",
+  "windSE": "SE",
+  "windS": "S",
+  "windSW": "SW",
+  "windW": "W",
+  "windNW": "NW",
+
+  "chartApparent": "Apparent Temperature",
+  "chartHumidity": "Humidity (%)",
+  "chartPrecipitation": "Precipitation (mm)",
+  "chartVisibility": "Visibility (Km)"
+}

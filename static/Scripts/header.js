@@ -6,6 +6,7 @@ const temperature = document.getElementsByClassName("temperature");
 const degree = document.getElementsByClassName("degree");
 
 let isCelsius = true
+let symbol = "°C";
 let timer;
 
 searchBar.addEventListener("input", () => {
@@ -52,7 +53,7 @@ cityList.addEventListener("input", () => {
 celsiusButton.addEventListener("click", () => {
     isCelsius = !isCelsius;
 
-    const symbol = isCelsius ? "°C": "°F";
+    symbol = isCelsius ? "°C": "°F";
     for (let i = 0; i < degree.length; i++) {
         if (i < temperature.length)
             temperature[i].textContent = `${invertDegree(Number(temperature[i].textContent), !isCelsius)}`;
@@ -62,18 +63,18 @@ celsiusButton.addEventListener("click", () => {
     const chart = Chart.getChart("chart");
     const chartLabel = chart.data.datasets[0].label;
 
-    if ( chartLabel.includes("Temperature", "Apparent Temperature") ) {
-        if (chartLabel.includes("Apparent")) {    
+    if ( chartLabel.includes(t("temperature")) ) {
+        if (chartLabel.includes(t("apparent"))) {    
             chart.data.datasets[0].data = isCelsius ?
                 hourlyData.apparent_temperature:
                 hourlyData.apparent_temperature.map(f => invertDegree(f, true));
-            chart.data.datasets[0].label =`Apparent Temperature (${symbol})`;
+            chart.data.datasets[0].label =`${t("apparent")} ${t("temperature")} (${symbol})`;
         }
         else {
             chart.data.datasets[0].data = isCelsius ?
                 hourlyData.temperature_2m:
                 hourlyData.temperature_2m.map(f => invertDegree(f, true));
-            chart.data.datasets[0].label = `Temperature (${symbol})`;
+            chart.data.datasets[0].label = `${t("temperature")} (${symbol})`;
         }
         chart.options.scales.y.suggestedMax = isCelsius ? 40: 120;
         chart.update();

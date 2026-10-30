@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
-        <title>Weather</title>
+        <meta charset="UTF-8">
+        <title data-i18n="pageTitle">Weather</title>
 
         <link rel="stylesheet" href="{{ url_for('static', filename='styles/general.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='styles/header.css') }}">
@@ -24,10 +25,16 @@
     </head>
     <body>
         <header id="header">
-            <div id="left"></div>
+            <div id="left">
+                <select id="lang-select" aria-label="Language">
+                    <option value="en">En</option>
+                    <option value="de">De</option>
+                    <option value="pt-BR">Pt-BR</option>
+                </select>
+            </div>
             <div id="middle">
                 <form id="search-bar-container">
-                    <input id="search-bar" type="text" placeholder="Search">
+                    <input id="search-bar" type="text" placeholder="Search" data-i18n-placeholder="search">
                     <ul id="city-list"></ul>
                 </form>
             </div>
@@ -40,7 +47,7 @@
         </header>
         <main id="info">
             <div id="current-weather-container">
-                <p id="current-weather-text">Current weather</p>
+                <p id="current-weather-text" data-i18n="currentWeather">Current weather</p>
                 <p id="city"></p>
                 <p id="date"></p>
             </div>
@@ -52,21 +59,21 @@
                         <div class="suntime">
                             <img src="{{ url_for('static', filename='Icons/Sunrise.svg') }}">
                             <div>                                
-                                <p class="sunhour">Sunrise</p>
+                                <p class="sunhour" data-i18n="sunrise">Sunrise</p>
                                 <p id="sunrise"></p>
                             </div>
                         </div>
                         <div class="suntime" >
                             <img src="{{ url_for('static', filename='Icons/Sunset.svg') }}">
                             <div>                                
-                                <p class="sunhour">Sunset</p>
+                                <p class="sunhour" data-i18n="sunset">Sunset</p>
                                 <p id="sunset"></p>
                             </div>
                         </div>
                     </div>
                     <div id="temperature-container">
                         <button id="temperature"></button>
-                        <p id="apparent-temperature">Feels like</p>
+                        <p id="apparent-temperature" data-i18n="feelsLike">Feels like</p>
                         <button id="apparent-temperature-button"></button>
                     </div>
                 </div>
@@ -94,6 +101,11 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
             crossorigin=""></script>
+    <script>
+        // Folder where the translation files live
+        window.LANG_PATH = "{{ url_for('static', filename='lang') }}";
+    </script>
+    <script src="{{ url_for('static', filename='Scripts/i18n.js') }}"></script>
     <script src="{{ url_for('static', filename='Scripts/header.js') }}"></script>
     <script src="{{ url_for('static', filename='Scripts/data.js') }}"></script>
 </html>
