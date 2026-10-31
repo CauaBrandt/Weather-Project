@@ -109,15 +109,18 @@ function drawChart(labels, data, label, color, options) {
     });
 }
 
+// Render part
+const convert = value => isCelsius ? value: invertDegree(value, true);
+const convertArray = arr => isCelsius ? arr: arr.map(n => invertDegree(n, true));
 let lastCityInfo, lastIndex;
 
 function renderHeader(cityInfo) {
     const city = document.getElementById("city");
-    const dateElement = document.getElementById("date");
+    const date = document.getElementById("date");
 
     city.textContent = `${cityInfo.name}, ${cityInfo.state}, ${cityInfo.country}`;
 
-    dateElement.textContent = new Date().toLocaleDateString(t("locale"));
+    date.textContent = new Date().toLocaleDateString(t("locale"));
 }
 
 function renderCurrent(hourlyData, i, dailyData) {
@@ -129,12 +132,16 @@ function renderCurrent(hourlyData, i, dailyData) {
     const currentApparentTemperature = document.getElementById("apparent-temperature-button");
     
     currentTemperature.innerHTML = "";
-    currentTemperature.appendChild(element({tag: "span", className: "temperature", text: hourlyData.temperature_2m[i]}));
-    currentTemperature.appendChild(element({tag: "span", className: "degree", text:"°C"}));
+    currentTemperature.append(
+        element({tag: "span", className: "temperature", text:convert(hourlyData.temperature_2m[i])}),
+        element({tag: "span", className: "degree", text:symbol})
+    );
 
     currentApparentTemperature.innerHTML = "";
-    currentApparentTemperature.appendChild(element({tag:"span", className:"temperature apparent-temperature-number", text:hourlyData.apparent_temperature[i]}));
-    currentApparentTemperature.appendChild(element({tag:"span", className:"degree apparent-temperature-degree", text:"°C"}));
+    currentApparentTemperature.append(
+        element({tag:"span", className:"temperature apparent-temperature-number", text:convert(hourlyData.apparent_temperature[i])}),
+        element({tag:"span", className:"degree apparent-temperature-degree", text:symbol})
+    );
 
     const windSpeed = document.getElementById("wind-speed");
     
@@ -162,7 +169,6 @@ function sizeChart(length, points) {
 }
 function renderChart(hourlyData) {
     const labels = hourlyData.time.map(h => `${new Date(h).getHours()}h`);
-    const convert = arr => isCelsius ? arr: arr.map(n => invertDegree(n, true));
     const scroller = document.getElementById("chart-scroller");
     
     sizeChart(labels.length, 25);
@@ -184,8 +190,8 @@ function renderChart(hourlyData) {
 
     const charts = [
        ["uv-index", () => hourlyData.uv_index, t("uvIndex"), "purple", baseOptions],
-       ["temperature", () => convert(hourlyData.temperature_2m), `${t("temperature")}`, "red", tempOptions],
-       ["apparent-temperature-button", () => convert(hourlyData.apparent_temperature), `${t("chartApparent")}`, "pink", tempOptions],
+       ["temperature", () => convertArray(hourlyData.temperature_2m), `${t("temperature")}`, "red", tempOptions],
+       ["apparent-temperature-button", () => convertArray(hourlyData.apparent_temperature), `${t("chartApparent")}`, "pink", tempOptions],
        ["humidity", () => hourlyData.relative_humidity_2m, t("chartHumidity"), "rgb(35, 130, 220)", baseOptions],
        ["precipitation", () => hourlyData.precipitation, t("chartPrecipitation"), "lightblue", baseOptions],
        ["visibility", () => hourlyData.visibility.map(n => n / 1000), t("chartVisibility"), "rgba(100,100,100,0.2)", baseOptions],
@@ -230,12 +236,12 @@ function renderForecast(dailyData) {
         const min = element({tag:"p", id:"min"});
 
         max.append(
-            element({tag:"span", className:"temperature", text:dailyData.temperature_2m_max[i]}),
-            element({tag:"span", className:"degree", text:"°C"})
+            element({tag:"span", className:"temperature", text:convert(dailyData.temperature_2m_max[i])}),
+            element({tag:"span", className:"degree", text:symbol})
         );
         min.append(
-            element({tag:"span", className:"temperature", text:dailyData.temperature_2m_min[i]}),
-            element({tag:"span", className:"degree", text:"°C"})
+            element({tag:"span", className:"temperature", text:convert(dailyData.temperature_2m_min[i])}),
+            element({tag:"span", className:"degree", text:symbol})
         );
 
         dayTemperatures.append(element({tag:"p", id:"week-day", text:weekDay}), max, min);
